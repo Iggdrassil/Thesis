@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Главное меню</title>
+    <link rel="stylesheet" th:href="@{/css_styles/main.css}">
+    <script defer th:src="@{/js_scrypts/main.js}"></script>
+</head>
+<body>
+<div class="main-container">
+    <header class="menu-header">
+        <div class="menu-title">
+            <h2>Меню</h2>
+            <p>Главное меню</p>
+        </div>
+        <div class="menu-buttons">
+            <button class="icon-button" id="settings-btn" title="Настройки">
+                <img src="/web/static/icons/settings.png" alt="Настройки">
+            </button>
+            <button class="icon-button" id="logout-btn" title="Выйти">
+                <img src="/web/static/icons/logout.png" alt="Выход">
+            </button>
+        </div>
+    </header>
+
+    <main class="menu-grid">
+        <div class="menu-card" onclick="goTo('stats')">
+            <img src="/web/static/icons/stat.png" alt="Статистика">
+            <h3>Статистика</h3>
+            <p>Статистика по инцидентам</p>
+        </div>
+
+        <div class="menu-card" onclick="goTo('incidents')">
+            <img src="/web/static/icons/inc.png" alt="Инциденты ИБ">
+            <h3>Инциденты ИБ</h3>
+            <p>Работа с инцидентами</p>
+        </div>
+
+        <div class="menu-card" onclick="goTo('audit')">
+            <img src="/web/static/icons/audit.png" alt="Аудит">
+            <h3>Аудит</h3>
+            <p>Просмотр событий системы</p>
+        </div>
+    </main>
+</div>
+</body>
+</html>

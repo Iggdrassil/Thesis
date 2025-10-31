@@ -1,0 +1,84 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: url("/web/static/background.gif") no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+
+/* Контейнер формы */
+.login-container {
+    background-color: rgba(255, 255, 255, 1);
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    width: 320px;
+}
+
+/* Заголовок */
+.login-form h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+/* Поля ввода */
+.login-form label {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+/* Обёртка для поля пароля */
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper img.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 37%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.password-wrapper img.toggle-password:hover {
+    opacity: 1;
+}
+
+/* Кнопка входа */
+.login-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #222;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-form button:hover {
+    background-color: #444;
+}
