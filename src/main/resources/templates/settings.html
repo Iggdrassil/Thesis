@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Настройки</title>
+    <link rel="stylesheet" th:href="@{/css_styles/settings.css}">
+    <script defer th:src="@{/js_scrypts/settings.js}"></script>
+</head>
+<body>
+<div class="main-container">
+    <div class="settings-header">
+        <h2>Настройки</h2>
+        <div class="settings-icons">
+            <button class="icon-button" id="backButton">
+                <img src="/web/static/icons/back.png" alt="Назад">
+            </button>
+            <button class="icon-button" id="logoutButton">
+                <img src="/web/static/icons/logout.png" alt="Выход">
+            </button>
+        </div>
+    </div>
+
+    <div class="menu-grid">
+        <div class="menu-card" onclick="location.href='/users'">
+            <h3>Пользователи</h3>
+            <p>Работа с пользователями</p>
+            <img src="/web/static/icons/users.png" alt="Пользователи">
+        </div>
+    </div>
+</div>
+</body>
+</html>
