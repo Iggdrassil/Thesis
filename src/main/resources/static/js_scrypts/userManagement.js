@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <img src="/web/static/icons/edit.png" alt="Редактировать">
             </button>
             <button class="icon-button" title="Удалить" ${user.username === 'admin' ? 'disabled' : ''} onclick="deleteUser('${user.username}')">
-                <img src="/web/static/icons/delete.png" alt="Удалить">
+                <img src="/web/static/icons/${user.username === 'admin' ? 'deleteUnable.png' : 'delete.png'}" alt="Удалить">
             </button>
   </div>
 `;
