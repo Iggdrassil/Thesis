@@ -5,6 +5,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const userList = document.getElementById("userList");
     const pagination = document.getElementById("pagination");
     const addUserBtn = document.getElementById("addUserBtn");
+    const backButton = document.getElementById("backButton");
+    const logoutButton = document.getElementById("logoutButton");
+    const homeButton = document.getElementById("homeBtn");
+
+    // Кнопка выхода
+    logoutButton.addEventListener("click", () => {
+        fetch("/logout", { method: "POST" })
+            .then(() => window.location.href = "/login");
+    });
+
+    // Кнопка назад — возвращаемся на предыдущее меню
+    backButton.addEventListener("click", () => {
+        window.history.back();
+    });
+
+    // Кнопка домой — возвращаемся сразу в главное меню
+    homeButton.addEventListener("click", () => {
+        fetch("/logout", { method: "GET" })
+            .then(() => window.location.href = "/main");
+    });
 
     async function fetchUsers(page) {
         try {
