@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 @Component
 public class UserDAO {
@@ -129,5 +131,27 @@ public class UserDAO {
             log.error("Error fetching user {}: {}", username, e.getMessage());
         }
         return Optional.empty();
+    }
+
+    public List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT id, username, password, role FROM users ORDER BY id";
+
+        try (Connection conn = database.createConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                UserRole role = UserRole.valueOf(rs.getString("role"));
+                users.add(new User(id, username, password, role));
+            }
+
+        } catch (SQLException e) {
+            log.error("Error fetching all users: {}", e.getMessage());
+        }
+        return users;
     }
 }
