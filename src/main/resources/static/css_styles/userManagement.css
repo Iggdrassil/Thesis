@@ -53,10 +53,14 @@ header {
 }
 
 .user-card {
-    background: #ebebeb;
-    border-radius: 10px;
+    background: #ffffff; /* тот же цвет, что и у container */
+    border-radius: 12px;
     padding: 20px;
     margin-top: 20px;
+
+    /* визуальное отделение от container */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* тонкая полупрозрачная рамка */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* мягкая тень */
 
     /* ↓↓↓ главный момент ↓↓↓ */
     flex-grow: 1;           /* растягивает блок на всё доступное место */
