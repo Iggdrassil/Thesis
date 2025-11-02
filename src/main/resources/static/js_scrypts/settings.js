@@ -12,4 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
         fetch("/logout", { method: "POST" })
             .then(() => window.location.href = "/login");
     });
+
+    document.querySelector("#usersCard").addEventListener("click", () => {
+        window.location.href = "userManagement.html?page=1";
+    });
+
 });

@@ -1,0 +1,138 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: url("/web/static/background.gif") no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* лучше, чем height: 100vh */
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 20px;
+    padding: 40px 60px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    max-width: 900px;
+    width: 90%;
+
+    /* ↓↓↓ Добавляем для растяжения содержимого ↓↓↓ */
+    display: flex;
+    flex-direction: column;
+    /*height: 90vh;          /* контейнер растянут почти на весь экран */
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0; /* чтобы не сжимался при нехватке места */
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.icon-button:hover {
+    transform: scale(1.1);
+}
+
+.icon-button img {
+    width: 28px;
+    height: 28px;
+}
+
+.user-card {
+    background: #ebebeb;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+
+    /* ↓↓↓ главный момент ↓↓↓ */
+    flex-grow: 1;           /* растягивает блок на всё доступное место */
+    display: flex;
+    flex-direction: column;
+}
+
+.user-card h3 {
+    margin-top: 0;
+}
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.user-actions button {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.user-actions button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 350px;
+}
+
+.page-btn {
+    padding: 5px 10px;
+    border: 1px solid #aaa;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.page-btn.active {
+    background: #222;
+    color: white;
+}
+
+.icon-add-button {
+    display: block;              /* делает кнопку блочным элементом */
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin: 2rem auto;           /* центрирует по горизонтали */
+    transition: transform 0.2s ease;
+    text-align: center;          /* центрирует содержимое внутри */
+}
+
+.icon-add-button:hover {
+    transform: scale(1.1);
+}
+
+.icon-add-button img {
+    width: 50px;
+    height: 50px;
+}
