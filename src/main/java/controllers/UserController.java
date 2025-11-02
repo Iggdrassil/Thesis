@@ -5,6 +5,8 @@ import database.models.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
+
+import java.security.Principal;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,7 +22,8 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public String usersPage() {
+    public String usersPage(Model model, Principal principal) {
+        model.addAttribute("currentUser", principal.getName());
         return "user-management";
     }
 

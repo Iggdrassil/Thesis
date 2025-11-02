@@ -15,16 +15,16 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(() => window.location.href = "/login");
     });
 
-    // Кнопка назад — возвращаемся на предыдущее меню
+// Кнопка назад — возвращаемся на предыдущее меню
     backButton.addEventListener("click", () => {
         window.history.back();
     });
 
-    // Кнопка домой — возвращаемся сразу в главное меню
+// Кнопка домой — переходим в главное меню без выхода
     homeButton.addEventListener("click", () => {
-        fetch("/logout", { method: "GET" })
-            .then(() => window.location.href = "/main");
+        window.location.href = "/main";
     });
+
 
     async function fetchUsers(page) {
         try {
@@ -50,23 +50,28 @@ document.addEventListener("DOMContentLoaded", () => {
         data.users.forEach(user => {
             const li = document.createElement("li");
             li.classList.add("user-item");
+
+            const isCurrentUser = user.username === currentUser;
+
             li.innerHTML = `
-            <div class="user-info">
-                <strong>${user.username}</strong>
-                <span>${user.role}</span>
-            </div>
-            <div class="user-actions">
+        <div class="user-info">
+            <strong>${user.username}</strong>
+            <span>${user.role}</span>
+        </div>
+        <div class="user-actions">
             <button class="icon-button" title="Редактировать" onclick="editUser('${user.username}')">
                 <img src="/web/static/icons/edit.png" alt="Редактировать">
             </button>
-            <button class="icon-button" title="Удалить" ${user.username === 'admin' ? 'disabled' : ''} onclick="deleteUser('${user.username}')">
-                <img src="/web/static/icons/${user.username === 'admin' ? 'deleteUnable.png' : 'delete.png'}" alt="Удалить">
+            <button class="icon-button ${isCurrentUser ? 'disabled' : ''}" title="Удалить"
+                ${isCurrentUser ? 'disabled' : ''} onclick="${isCurrentUser ? '' : `deleteUser('${user.username}')`}">
+                <img src="/web/static/icons/${isCurrentUser ? 'deleteUnable.png' : 'delete.png'}" alt="Удалить">
             </button>
-  </div>
-`;
+        </div>
+    `;
 
             userList.appendChild(li);
         });
+
 
         // пагинация
         for (let i = 1; i <= data.totalPages; i++) {

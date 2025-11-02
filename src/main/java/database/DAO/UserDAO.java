@@ -5,32 +5,36 @@ import database.models.User;
 import enums.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 @Component
 public class UserDAO {
 
     private static final Logger log = LoggerFactory.getLogger(UserDAO.class);
-
     private final Database database;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserDAO(Database database) {
+    public UserDAO(Database database, PasswordEncoder passwordEncoder) {
         this.database = database;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Добавление пользователя
     public Optional<User> addUser(String username, String password, UserRole role) {
         log.info("Adding user {} with password {} and role {}", username, password, role);
         String sql = "INSERT INTO users(username, password, role) VALUES (?, ?, ?)";
+        String hashed = passwordEncoder.encode(password);
         try (Connection conn = database.createConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, username);
-            stmt.setString(2, password);
+            stmt.setString(2, hashed);
             stmt.setString(3, role.name());
 
             log.info("Executing SQL: {}", stmt);
@@ -81,13 +85,14 @@ public class UserDAO {
     public Optional<User> editUser(String username, String newPassword, UserRole newRole) {
         log.info("Editing user {}", username);
         Optional<User> userOpt = getUserByUsername(username);
+        String hashed = passwordEncoder.encode(newPassword);
         if (userOpt.isEmpty()) return Optional.empty();
 
         String sql = "UPDATE users SET password = ?, role = ? WHERE username = ?";
         try (Connection conn = database.createConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, newPassword);
+            stmt.setString(1, hashed);
             stmt.setString(2, newRole.name());
             stmt.setString(3, username);
 

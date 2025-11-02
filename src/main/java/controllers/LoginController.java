@@ -30,6 +30,7 @@ public class LoginController {
         return "login"; // имя шаблона login.html
     }
 
+/*
     @PostMapping("/login")
     public String loginUser(@RequestParam String username,
                             @RequestParam String password,
@@ -56,6 +57,7 @@ public class LoginController {
         log.info("User {} failed to login", username);
         return "login";
     }
+*/
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
