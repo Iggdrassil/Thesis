@@ -77,4 +77,23 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/delete/{username}")
+    @ResponseBody
+    public ResponseEntity<?> deleteUser(@PathVariable String username, Principal principal) {
+        // нельзя удалить себя
+        String current = principal.getName();
+        if (current.equals(username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Нельзя удалить самого себя"));
+        }
+
+        Optional<User> deleted = userDAO.deleteUser(username);
+        if (deleted.isPresent()) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Пользователь не найден"));
+        }
+    }
+
 }

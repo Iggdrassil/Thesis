@@ -1,3 +1,7 @@
+const errorModal = document.getElementById("errorModal");
+const closeErrorModal = document.getElementById("closeErrorModal");
+const errorMessage = document.getElementById("errorMessage");
+
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentPage = parseInt(urlParams.get("page")) || 1;
@@ -13,12 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const createUserBtn = document.getElementById("createUserBtn");
     const cancelAddUser = document.getElementById("cancelAddUser");
 
-    const errorModal = document.getElementById("errorModal");
-    const closeErrorModal = document.getElementById("closeErrorModal");
-    const errorMessage = document.getElementById("errorMessage");
-
     const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
 
     // Кнопка выхода
     logoutButton.addEventListener("click", () => {
@@ -73,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="icon-button" title="Редактировать" onclick="editUser('${user.username}')">
                 <img src="/web/static/icons/edit.png" alt="Редактировать">
             </button>
-            <button class="icon-button ${isCurrentUser ? 'disabled' : ''}" title="Удалить"
+            <button class="icon-button ${isCurrentUser ? 'disabled' : ''}" title="Удалить" onclick="deleteUser('${user.username}')"
                 ${isCurrentUser ? 'disabled' : ''} onclick="${isCurrentUser ? '' : `deleteUser('${user.username}')`}">
                 <img src="/web/static/icons/${isCurrentUser ? 'deleteUnable.png' : 'delete.png'}" alt="Удалить">
             </button>
@@ -152,17 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-// Ошибка — показать
-    function showErrorModal(message) {
-        errorMessage.textContent = message;
-        errorModal.style.display = "flex";
-    }
-
-// Ошибка — закрыть
-    closeErrorModal.addEventListener("click", () => {
-        errorModal.style.display = "none";
-    });
-
     render(currentPage);
 });
 
@@ -172,7 +162,68 @@ function editUser(username) {
 }
 
 function deleteUser(username) {
-    if (confirm(`Удалить пользователя "${username}"?`)) {
-        alert("Пользователь удалён (реализуется позже)");
-    }
+    const confirmDeleteModal = document.getElementById("confirmDeleteModal");
+    const deleteTitle = document.getElementById("deleteTitle");
+    const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+    const closeDeleteModal = document.getElementById("closeDeleteModal");
+
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    deleteTitle.textContent = `Удалить пользователя "${username}"?`;
+    confirmDeleteModal.style.display = "flex";
+
+    // Очистим старые обработчики, если модалка открывалась ранее
+    const newConfirmBtn = confirmDeleteBtn.cloneNode(true);
+    confirmDeleteBtn.parentNode.replaceChild(newConfirmBtn, confirmDeleteBtn);
+
+    // Подтверждение удаления
+    newConfirmBtn.addEventListener("click", async () => {
+        try {
+            const response = await fetch(`/users/delete/${encodeURIComponent(username)}`, {
+                method: "DELETE",
+                headers: {
+                    [header]: token
+                },
+                credentials: "same-origin"
+            });
+
+            if (response.ok) {
+                confirmDeleteModal.style.display = "none";
+                location.reload();
+            } else if (response.status === 403) {
+                showErrorModal("Нельзя удалить самого себя");
+            } else if (response.status === 404) {
+                alert("Пользователь не найден");
+            } else {
+                alert("Ошибка при удалении пользователя");
+            }
+        } catch (err) {
+            alert("Ошибка соединения с сервером");
+        }
+    });
+
+    // Отмена
+    cancelDeleteBtn.addEventListener("click", () => {
+        confirmDeleteModal.style.display = "none";
+    });
+
+    // Крестик
+    closeDeleteModal.addEventListener("click", () => {
+        confirmDeleteModal.style.display = "none";
+    });
 }
+
+// Ошибка — показать
+function showErrorModal(message) {
+    let errorMessage = document.getElementById("errorMessage");
+    errorMessage.textContent = message;
+    errorModal.style.display = "flex";
+}
+
+// Ошибка — закрыть
+closeErrorModal.addEventListener("click", () => {
+    errorModal.style.display = "none";
+});
+

@@ -73,5 +73,28 @@
     </div>
 </div>
 
+<!-- Модальное окно ошибки удаления -->
+<div id="deleteErrorModal" class="modal-overlay">
+    <div class="modal-window error-window">
+        <h2>Ошибка!</h2>
+        <p id="deleteMessage">Нельзя удалить самого себя</p>
+        <button id="deleteCloseErrorModal">Закрыть</button>
+    </div>
+</div>
+
+<!-- Модальное подтверждение удаления -->
+<div id="confirmDeleteModal" class="modal-overlay">
+    <div class="modal-window">
+        <button class="modal-close" id="closeDeleteModal" aria-label="Закрыть">×</button>
+        <h2 id="deleteTitle">Удалить пользователя %имя%?</h2>
+        <p id="deleteSubtitle">Подтвердите удаление</p>
+        <div class="modal-actions">
+            <button id="cancelDeleteBtn">Отмена</button>
+            <button id="confirmDeleteBtn" class="danger">Да</button>
+        </div>
+    </div>
+</div>
+
+
 </body>
 </html>
