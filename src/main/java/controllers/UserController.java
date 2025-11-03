@@ -1,7 +1,10 @@
 package controllers;
 
 import database.DAO.UserDAO;
+import database.DTO.UserDTO;
 import database.models.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
@@ -63,4 +66,15 @@ public class UserController {
         response.put("page", page);
         return response;
     }
+
+    @PostMapping("/add")
+    @ResponseBody
+    public ResponseEntity<?> addUser(@RequestBody UserDTO userDto) {
+        if (userDAO.isUserExists(userDto.getUsername())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        userDAO.addUser(userDto.getUsername(), userDto.getPassword(), userDto.getRole());
+        return ResponseEntity.ok().build();
+    }
+
 }

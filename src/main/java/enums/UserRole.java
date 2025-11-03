@@ -1,5 +1,6 @@
 package enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
@@ -18,5 +19,15 @@ public enum UserRole {
     @JsonValue
     public String getRoleName() {
         return roleName;
+    }
+
+    @JsonCreator
+    public static UserRole fromString(String value) {
+        return switch (value.toUpperCase()) {
+            case "ADMIN", "АДМИНИСТРАТОР ИБ" -> ADMIN;
+            case "USER", "ПОЛЬЗОВАТЕЛЬ" -> USER;
+            case "AUDITOR", "АУДИТОР" -> AUDITOR;
+            default -> throw new IllegalArgumentException("Unknown role: " + value);
+        };
     }
 }

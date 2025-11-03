@@ -8,6 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const backButton = document.getElementById("backButton");
     const logoutButton = document.getElementById("logoutButton");
     const homeButton = document.getElementById("homeBtn");
+    const addUserModal = document.getElementById("addUserModal");
+    const addUserForm = document.getElementById("addUserForm");
+    const createUserBtn = document.getElementById("createUserBtn");
+    const cancelAddUser = document.getElementById("cancelAddUser");
+
+    const errorModal = document.getElementById("errorModal");
+    const closeErrorModal = document.getElementById("closeErrorModal");
+    const errorMessage = document.getElementById("errorMessage");
+
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
     // Кнопка выхода
     logoutButton.addEventListener("click", () => {
@@ -86,8 +97,70 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Показ модального окна
     addUserBtn.addEventListener("click", () => {
-        alert("Добавление нового пользователя (реализуется позже)");
+        addUserModal.style.display = "flex";
+    });
+
+    // Закрытие
+    cancelAddUser.addEventListener("click", () => {
+        addUserModal.style.display = "none";
+        addUserForm.reset();
+        createUserBtn.disabled = true;
+    });
+
+// Валидация формы
+    addUserForm.addEventListener("input", () => {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const roleSelected = addUserForm.querySelector('input[name="role"]:checked');
+        createUserBtn.disabled = !(username && password && roleSelected);
+    });
+
+// Отправка формы
+    addUserForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const role = addUserForm.querySelector('input[name="role"]:checked').value;
+
+        try {
+            const headers = {
+                "Content-Type": "application/json",
+                [header]: token  // добавление CSRF-заголовка
+            };
+
+            const response = await fetch("/users/add", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({ username, password, role }),
+                credentials: "same-origin"  // <--- обязательно!
+            });
+
+            if (response.ok) {
+                addUserModal.style.display = "none";
+                addUserForm.reset();
+                createUserBtn.disabled = true;
+                location.reload(); // обновляем список пользователей
+            } else if (response.status === 409) { // конфликт (уже существует)
+                showErrorModal("Пользователь уже существует");
+            } else {
+                showErrorModal("Ошибка при создании пользователя");
+            }
+        } catch (err) {
+            showErrorModal("Ошибка соединения с сервером");
+        }
+    });
+
+// Ошибка — показать
+    function showErrorModal(message) {
+        errorMessage.textContent = message;
+        errorModal.style.display = "flex";
+    }
+
+// Ошибка — закрыть
+    closeErrorModal.addEventListener("click", () => {
+        errorModal.style.display = "none";
     });
 
     render(currentPage);

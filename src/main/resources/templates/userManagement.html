@@ -7,6 +7,9 @@
     <link rel="stylesheet" th:href="@{/css_styles/userManagement.css}">
     <script defer th:src="@{/js_scrypts/userManagement.js}"></script>
     <input type="hidden" id="currentUser" th:value="${currentUser}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
 </head>
 <body>
 <div class="container">
@@ -36,5 +39,39 @@
         <img src="/web/static/icons/addUser.png" alt="Добавить пользователя">
     </button>
 </div>
+<!-- Модальное окно добавления пользователя -->
+<div id="addUserModal" class="modal-overlay">
+    <div class="modal-window">
+        <h2>Добавить пользователя</h2>
+        <form id="addUserForm">
+            <label for="username">Имя</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" required>
+
+            <div class="role-group">
+                <label><input type="radio" name="role" value="ADMIN" required> Администратор ИБ</label>
+                <label><input type="radio" name="role" value="AUDITOR" required> Аудитор</label>
+                <label><input type="radio" name="role" value="USER" required> Пользователь</label>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelAddUser">Отмена</button>
+                <button type="submit" id="createUserBtn" disabled>Создать</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно ошибки -->
+<div id="errorModal" class="modal-overlay">
+    <div class="modal-window error-window">
+        <h2>Ошибка!</h2>
+        <p id="errorMessage">Пользователь уже существует</p>
+        <button id="closeErrorModal">Закрыть</button>
+    </div>
+</div>
+
 </body>
 </html>

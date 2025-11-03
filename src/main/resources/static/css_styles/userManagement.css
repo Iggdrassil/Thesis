@@ -140,3 +140,94 @@ header {
     width: 50px;
     height: 50px;
 }
+
+/* затемнение фона */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* само окно */
+.modal-window {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
+}
+
+.modal-window h2 {
+    margin-top: 0;
+    font-size: 1.3rem;
+}
+
+.modal-window input[type="text"],
+.modal-window input[type="password"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.role-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.modal-actions button {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-actions button:hover:not(:disabled) {
+    background: #f0f0f0;
+}
+
+#createUserBtn {
+    background: #222;
+    color: white;
+}
+
+#createUserBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* окно ошибки */
+.error-window {
+    width: 320px;
+    text-align: center;
+}
+
+#errorModal p {
+    margin: 1rem 0;
+}
+
+#errorModal button {
+    background: #222;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
