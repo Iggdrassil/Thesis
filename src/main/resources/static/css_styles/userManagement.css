@@ -262,3 +262,22 @@ header {
     right: 10px;
     cursor: pointer;
 }
+
+/* Базовые модалки */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* <-- базовый уровень */
+}
+
+/* Модальное окно ошибки — поверх всех */
+#errorModal {
+    z-index: 2000; /* <-- выше, чем confirmDeleteModal */
+}
