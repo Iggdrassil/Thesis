@@ -1,13 +1,13 @@
 const errorModal = document.getElementById("errorModal");
 const closeErrorModal = document.getElementById("closeErrorModal");
 const errorMessage = document.getElementById("errorMessage");
+const userList = document.getElementById("userList");
+const pagination = document.getElementById("pagination");
 
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentPage = parseInt(urlParams.get("page")) || 1;
 
-    const userList = document.getElementById("userList");
-    const pagination = document.getElementById("pagination");
     const addUserBtn = document.getElementById("addUserBtn");
     const backButton = document.getElementById("backButton");
     const logoutButton = document.getElementById("logoutButton");
@@ -36,69 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
     homeButton.addEventListener("click", () => {
         window.location.href = "/main";
     });
-
-
-    async function fetchUsers(page) {
-        try {
-            const response = await fetch(`/users/api?page=${page}`);
-            if (!response.ok) throw new Error("Ошибка при загрузке данных");
-            return await response.json();
-        } catch (e) {
-            console.error("Ошибка запроса:", e);
-            return { users: [], totalPages: 1, page: 1 };
-        }
-    }
-
-    async function render(page) {
-        const data = await fetchUsers(page);
-        userList.innerHTML = "";
-        pagination.innerHTML = "";
-
-        if (!data.users.length) {
-            userList.innerHTML = `<li style="text-align:center; margin-top:1rem;">Нет пользователей</li>`;
-            return;
-        }
-
-        data.users.forEach(user => {
-            const li = document.createElement("li");
-            li.classList.add("user-item");
-
-            const isCurrentUser = user.username === currentUser;
-
-            li.innerHTML = `
-        <div class="user-info">
-            <strong>${user.username}</strong>
-            <span>${user.role}</span>
-        </div>
-        <div class="user-actions">
-            <button class="icon-button" title="Редактировать" onclick="editUser('${user.username}')">
-                <img src="/web/static/icons/edit.png" alt="Редактировать">
-            </button>
-            <button class="icon-button ${isCurrentUser ? 'disabled' : ''}" title="Удалить" onclick="deleteUser('${user.username}')"
-                ${isCurrentUser ? 'disabled' : ''} onclick="${isCurrentUser ? '' : `deleteUser('${user.username}')`}">
-                <img src="/web/static/icons/${isCurrentUser ? 'deleteUnable.png' : 'delete.png'}" alt="Удалить">
-            </button>
-        </div>
-    `;
-
-            userList.appendChild(li);
-        });
-
-        // скрываем скролл при пагинации
-        userList.style.overflowY = data.totalPages > 1 ? "hidden" : "auto";
-
-        // пагинация
-        for (let i = 1; i <= data.totalPages; i++) {
-            const btn = document.createElement("button");
-            btn.textContent = i;
-            btn.classList.add("page-btn");
-            if (i === data.page) btn.classList.add("active");
-            btn.addEventListener("click", () => {
-                window.location.href = `/users?page=${i}`;
-            });
-            pagination.appendChild(btn);
-        }
-    }
 
     // Показ модального окна
     addUserBtn.addEventListener("click", () => {
@@ -194,7 +131,7 @@ function deleteUser(username) {
 
             if (response.ok) {
                 confirmDeleteModal.style.display = "none";
-                location.reload();
+                await render(1); // <-- заново отрисовываем первую страницу
             } else if (response.status === 403) {
                 showErrorModal("Нельзя удалить самого себя");
             } else if (response.status === 404) {
@@ -229,4 +166,66 @@ function showErrorModal(message) {
 closeErrorModal.addEventListener("click", () => {
     errorModal.style.display = "none";
 });
+
+async function fetchUsers(page) {
+    try {
+        const response = await fetch(`/users/list?page=${page}`);
+        if (!response.ok) throw new Error("Ошибка при загрузке данных");
+        return await response.json();
+    } catch (e) {
+        console.error("Ошибка запроса:", e);
+        return { users: [], totalPages: 1, page: 1 };
+    }
+}
+
+async function render(page) {
+    const data = await fetchUsers(page);
+    userList.innerHTML = "";
+    pagination.innerHTML = "";
+
+    if (!data.users.length) {
+        userList.innerHTML = `<li style="text-align:center; margin-top:1rem;">Нет пользователей</li>`;
+        return;
+    }
+
+    data.users.forEach(user => {
+        const li = document.createElement("li");
+        li.classList.add("user-item");
+
+        const isCurrentUser = user.username === currentUser;
+
+        li.innerHTML = `
+        <div class="user-info">
+            <strong>${user.username}</strong>
+            <span>${user.role}</span>
+        </div>
+        <div class="user-actions">
+            <button class="icon-button" title="Редактировать" onclick="editUser('${user.username}')">
+                <img src="/web/static/icons/edit.png" alt="Редактировать">
+            </button>
+            <button class="icon-button ${isCurrentUser ? 'disabled' : ''}" title="Удалить" onclick="deleteUser('${user.username}')"
+                ${isCurrentUser ? 'disabled' : ''} onclick="${isCurrentUser ? '' : `deleteUser('${user.username}')`}">
+                <img src="/web/static/icons/${isCurrentUser ? 'deleteUnable.png' : 'delete.png'}" alt="Удалить">
+            </button>
+        </div>
+    `;
+
+        userList.appendChild(li);
+    });
+
+    // скрываем скролл при пагинации
+    userList.style.overflowY = data.totalPages > 1 ? "hidden" : "auto";
+
+    // пагинация
+    for (let i = 1; i <= data.totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        btn.classList.add("page-btn");
+        if (i === data.page) btn.classList.add("active");
+        btn.addEventListener("click", () => {
+            window.location.href = `/users?page=${i}`;
+        });
+        pagination.appendChild(btn);
+    }
+}
 

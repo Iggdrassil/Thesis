@@ -49,7 +49,7 @@ public class UserController {
     }
 
     // REST-запрос на получение пользователей
-    @GetMapping("/api")
+    @GetMapping("/list")
     @ResponseBody
     public Map<String, Object> getUsers(@RequestParam(defaultValue = "1") int page) {
         List<User> allUsers = userDAO.getAllUsers();
