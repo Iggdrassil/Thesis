@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RequestMapping("/users")
 public class UserController {
 
+    private final int pageSize = 5;
     private final UserDAO userDAO;
 
     @Autowired
@@ -33,7 +34,6 @@ public class UserController {
     // Отображение страницы
     @GetMapping
     public String usersPage(@RequestParam(defaultValue = "1") int page, Model model) {
-        int pageSize = 10;
         List<User> allUsers = userDAO.getAllUsers();
         int totalPages = (int) Math.ceil((double) allUsers.size() / pageSize);
 
@@ -52,7 +52,6 @@ public class UserController {
     @GetMapping("/api")
     @ResponseBody
     public Map<String, Object> getUsers(@RequestParam(defaultValue = "1") int page) {
-        int pageSize = 10;
         List<User> allUsers = userDAO.getAllUsers();
         int totalPages = (int) Math.ceil((double) allUsers.size() / pageSize);
 

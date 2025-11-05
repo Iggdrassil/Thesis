@@ -84,6 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
             userList.appendChild(li);
         });
 
+        // скрываем скролл при пагинации
+        userList.style.overflowY = data.totalPages > 1 ? "hidden" : "auto";
 
         // пагинация
         for (let i = 1; i <= data.totalPages; i++) {
@@ -142,8 +144,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 addUserModal.style.display = "none";
                 addUserForm.reset();
                 createUserBtn.disabled = true;
-                location.reload(); // обновляем список пользователей
-            } else if (response.status === 409) { // конфликт (уже существует)
+                await render(1); // <-- заново отрисовываем первую страницу
+
+        } else if (response.status === 409) { // конфликт (уже существует)
                 showErrorModal("Пользователь уже существует");
             } else {
                 showErrorModal("Ошибка при создании пользователя");
