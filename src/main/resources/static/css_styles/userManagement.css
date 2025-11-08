@@ -1,20 +1,19 @@
 body {
     margin: 0;
-    padding: 0;
     font-family: "Segoe UI", Arial, sans-serif;
     background: url("/web/static/background.gif") no-repeat center center fixed;
     background-size: cover;
     display: flex;
-    /*justify-content: center;*/
+    justify-content: center;
     align-items: center;
     overflow: hidden;
-    min-height: 100vh; /* лучше, чем height: 100vh */
+    min-height: 100vh; /* чтобы центрировалось по вертикали */
 
     flex-direction: column;
-    justify-content: flex-start;
-    background-color: #f8f9fa;
+    /*justify-content: flex-start;*/
     position: relative;
-    padding-bottom: 100px; /* место под кнопку добавления */
+    /* место под кнопку добавления */
+    padding: 0 0 100px;
 }
 
 .container {
@@ -24,23 +23,25 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     max-width: 900px;
     width: 90%;
-    margin: auto;
+/*    margin: auto;*/
 
     /* ↓↓↓ Добавляем для растяжения содержимого ↓↓↓ */
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     /*height: 90vh;          /* контейнер растянут почти на весь экран */
 }
 
 header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     flex-shrink: 0; /* чтобы не сжимался при нехватке места */
+    align-items: center;
 }
 
 .header-buttons {
     display: flex;
+    align-items: center;
     gap: 10px;
 }
 
@@ -76,9 +77,25 @@ header {
     flex-direction: column;
 
     flex: 1;
+   /* overflow-y: auto;
+    max-height: 450px; !* ограничиваем, чтобы не тянуло страницу *!
+    //margin-bottom: 10px;*/
+
+    width: 95%;
+    min-height: 400px; /* фиксируем минимальную высоту */
+    max-height: 450px; /* чтобы не росла при добавлении пользователей */
+    overflow: hidden; /* чтобы не появлялся внутренний скролл */
+    justify-content: space-between;
+    transition: height 0.3s ease;
+}
+
+/* контейнер со списком пользователей */
+.ul {
+    flex: 1;
     overflow-y: auto;
-    max-height: 450px; /* ограничиваем, чтобы не тянуло страницу */
-    //margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* пользователи сверху */
 }
 
 .user-card h3 {

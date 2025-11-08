@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RequestMapping("/users")
 public class UserController {
 
-    private final int pageSize = 5;
+    private static final int pageSize = 5;
     private final UserDAO userDAO;
 
     @Autowired
@@ -25,15 +25,15 @@ public class UserController {
         this.userDAO = userDAO;
     }
 
-    @GetMapping("/users")
+  /*  @GetMapping("/users")
     public String usersPage(Model model, Principal principal) {
         model.addAttribute("currentUser", principal.getName());
         return "user-management";
-    }
+    }*/
 
     // Отображение страницы
     @GetMapping
-    public String usersPage(@RequestParam(defaultValue = "1") int page, Model model) {
+    public String usersPage(@RequestParam(defaultValue = "1") int page, Model model, Principal principal) {
         List<User> allUsers = userDAO.getAllUsers();
         int totalPages = (int) Math.ceil((double) allUsers.size() / pageSize);
 
@@ -41,6 +41,7 @@ public class UserController {
         int end = Math.min(start + pageSize, allUsers.size());
         List<User> usersOnPage = allUsers.subList(start, end);
 
+        model.addAttribute("currentUser", principal.getName());
         model.addAttribute("users", usersOnPage);
         model.addAttribute("page", page);
         model.addAttribute("totalPages", totalPages);
