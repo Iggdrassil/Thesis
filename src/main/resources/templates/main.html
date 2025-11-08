@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <title>Главное меню</title>
     <link rel="stylesheet" th:href="@{/css_styles/main.css}">
-    <script defer th:src="@{/js_scrypts/main.js}"></script>
 </head>
-<body>
+<body th:attr="data-role=${role}">
 <div class="main-container">
     <header class="menu-header">
         <div class="menu-title">
@@ -24,24 +23,25 @@
     </header>
 
     <main class="menu-grid">
-        <div class="menu-card" onclick="goTo('stats')">
+        <div class="menu-card" onclick="goTo('stats')" id="stat">
             <img src="/web/static/icons/stat.png" alt="Статистика">
             <h3>Статистика</h3>
             <p>Статистика по инцидентам</p>
         </div>
 
-        <div class="menu-card" onclick="goTo('incidents')">
+        <div class="menu-card" onclick="goTo('incidents')" id="incidents">
             <img src="/web/static/icons/inc.png" alt="Инциденты ИБ">
             <h3>Инциденты ИБ</h3>
             <p>Работа с инцидентами</p>
         </div>
 
-        <div class="menu-card" onclick="goTo('audit')">
+        <div class="menu-card" onclick="goTo('audit')" id="audit">
             <img src="/web/static/icons/audit.png" alt="Аудит">
             <h3>Аудит</h3>
             <p>Просмотр событий системы</p>
         </div>
     </main>
 </div>
+<script th:src="@{/js_scrypts/main.js}"></script>
 </body>
 </html>

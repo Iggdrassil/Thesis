@@ -26,7 +26,7 @@ public class SecurityConfig {
                 // кастомная форма логина
                 .formLogin(form -> form
                         .loginPage("/login")           // GET /login — твой шаблон
-                        .loginProcessingUrl("/perform_login") // POST сюда будет отправляться форма
+                        .loginProcessingUrl("/userLogin") // POST сюда будет отправляться форма
                         .defaultSuccessUrl("/main", true) // куда редирект после успешной аутентификации
                         .failureUrl("/login?error=true")
                         .permitAll()
