@@ -8,9 +8,7 @@ body {
     align-items: center;
     overflow: hidden;
     min-height: 100vh; /* чтобы центрировалось по вертикали */
-
     flex-direction: column;
-    /*justify-content: flex-start;*/
     position: relative;
     /* место под кнопку добавления */
     padding: 0 0 100px;
@@ -23,13 +21,9 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     max-width: 900px;
     width: 90%;
-/*    margin: auto;*/
-
-    /* ↓↓↓ Добавляем для растяжения содержимого ↓↓↓ */
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    /*height: 90vh;          /* контейнер растянут почти на весь экран */
 }
 
 header {
@@ -70,17 +64,10 @@ header {
     /* визуальное отделение от container */
     border: 1px solid rgba(0, 0, 0, 0.1); /* тонкая полупрозрачная рамка */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* мягкая тень */
-
-    /* ↓↓↓ главный момент ↓↓↓ */
-   /* flex-grow: 1; */          /* растягивает блок на всё доступное место */
     display: flex;
     flex-direction: column;
 
     flex: 1;
-   /* overflow-y: auto;
-    max-height: 450px; !* ограничиваем, чтобы не тянуло страницу *!
-    //margin-bottom: 10px;*/
-
     width: 95%;
     min-height: 400px; /* фиксируем минимальную высоту */
     max-height: 450px; /* чтобы не росла при добавлении пользователей */
@@ -90,7 +77,7 @@ header {
 }
 
 /* контейнер со списком пользователей */
-.ul {
+.user-list {
     flex: 1;
     overflow-y: auto;
     display: flex;
@@ -135,11 +122,6 @@ header {
 .pagination {
     display: flex;
     justify-content: center;
-   /* gap: 5px;
-    margin-top: 350px;
-
-    display: flex;
-    justify-content: center;*/
     align-items: center;
     gap: 8px;
     margin-top: 10px;

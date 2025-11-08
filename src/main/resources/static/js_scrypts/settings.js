@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Ошибка запроса:", e);
             return { users: [], totalPages: 1, page: 1 };
         }
-        /*window.location.href = "userManagement.html?page=1";*/
     });
 
 });

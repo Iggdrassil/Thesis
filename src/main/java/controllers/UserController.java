@@ -25,12 +25,6 @@ public class UserController {
         this.userDAO = userDAO;
     }
 
-  /*  @GetMapping("/users")
-    public String usersPage(Model model, Principal principal) {
-        model.addAttribute("currentUser", principal.getName());
-        return "user-management";
-    }*/
-
     // Отображение страницы
     @GetMapping
     public String usersPage(@RequestParam(defaultValue = "1") int page, Model model, Principal principal) {
