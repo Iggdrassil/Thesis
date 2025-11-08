@@ -17,8 +17,6 @@ public class MainController {
                 .findFirst()
                 .orElse("USER");
         model.addAttribute("role", role);
-
-        System.out.println("Role from principal: " + role);
         return "main"; // имя шаблона main.html
     }
 }
