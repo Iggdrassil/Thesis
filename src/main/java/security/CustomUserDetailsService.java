@@ -25,7 +25,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // Конвертируем роль в GrantedAuthority: ROLE_ADMIN и т.д.
         String roleName = "ROLE_" + user.getRole().name(); // UserRole.ADMIN -> ROLE_ADMIN
-        System.out.println("=>>>>>>" + roleName);
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword()) // пароль уже должен быть в хэше
