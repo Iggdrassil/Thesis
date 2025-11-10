@@ -40,6 +40,22 @@ public class DatabaseInitializer {
             stmt.execute(sqlUsers);
             log.info("Table \"users\" created or already exists");
 
+            // Создание таблицы инцидентов
+            log.info("Creating \"incidents\" table if not exists");
+            String sqlIncidents = "CREATE TABLE IF NOT EXISTS incidents (" +
+                    "id TEXT PRIMARY KEY, " + // UUID в виде строки
+                    "title TEXT NOT NULL, " +
+                    "description TEXT, " +
+                    "author TEXT NOT NULL, " +
+                    "creation_date TEXT NOT NULL, " + // LocalDate как ISO-строка
+                    "updated_date TEXT, " +
+                    "incident_category TEXT NOT NULL, " +
+                    "incident_level TEXT NOT NULL, " +
+                    "incident_recommendations TEXT" + // Храним как JSON или CSV
+                    ");";
+            stmt.execute(sqlIncidents);
+            log.info("Table \"incidents\" created or already exists");
+
             creatingDefaultAdmin();
 
         } catch (SQLException e) {
