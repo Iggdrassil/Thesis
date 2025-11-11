@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Инциденты ИБ</title>
+    <link rel="stylesheet" th:href="@{/css_styles/incidents.css}">
+    <script defer th:src="@{/js_scrypts/incidents.js}"></script>
+</head>
+<body>
+
+<div class="container">
+    <!-- Заголовок -->
+    <header>
+        <h1>Инциденты ИБ</h1>
+        <div class="header-buttons">
+            <button class="icon-button" id="backButton">
+                <img src="/web/static/icons/back.png" alt="Назад">
+            </button>
+            <button class="icon-button" id="logoutButton">
+                <img src="/web/static/icons/logout.png" alt="Выход">
+            </button>
+        </div>
+    </header>
+
+    <!-- Основная карточка -->
+    <div class="incident-card">
+        <h3>Заведенные в системе инциденты информационной безопасности</h3>
+
+        <!-- Список инцидентов -->
+        <div class="incident-list" th:if="${!#lists.isEmpty(incidents)}">
+            <div class="incident-item" th:each="incident : ${incidents}">
+                <div class="incident-info">
+                    <strong th:text="${incident.title}">Название инцидента</strong>
+                    <span th:text="${incident.description}">Описание инцидента</span>
+                </div>
+
+                <div class="incident-meta">
+                    <span th:text="${#temporals.format(incident.creationDate, 'HH:mm:ss dd.MM.yyyy')}">
+                        00:00:00 01.01.2025
+                    </span>
+                    <span class="incident-level"
+                          th:classappend="${incident.incidentLevel.name().toLowerCase()}"
+                          th:text="${incident.incidentLevel.name()}">
+                        LOW
+                    </span>
+                </div>
+
+                <div class="incident-actions">
+                    <button title="Редактировать"
+                            th:onclick="'openEditIncident(\\'' + ${incident.id} + '\\')'">✏️</button>
+                    <button title="Удалить"
+                            th:onclick="'deleteIncident(\\'' + ${incident.id} + '\\')'">🗑️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Если нет инцидентов -->
+        <div class="no-incidents" th:if="${#lists.isEmpty(incidents)}">
+            Инциденты отсутствуют
+        </div>
+
+        <!-- Пагинация -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <button class="page-btn"
+                    th:if="${page > 1}"
+                    th:onclick="'window.location.href=\'/incidents?page=' + (${page}-1) + '\''">←</button>
+
+            <button class="page-btn"
+                    th:each="p : ${#numbers.sequence(1, totalPages)}"
+                    th:text="${p}"
+                    th:classappend="${p == page} ? 'active' : ''"
+                    th:onclick="'window.location.href=\'/incidents?page=' + ${p} + '\''"></button>
+
+            <button class="page-btn"
+                    th:if="${page < totalPages}"
+                    th:onclick="'window.location.href=\'/incidents?page=' + (${page}+1) + '\''">→</button>
+        </div>
+    </div>
+
+    <!-- Кнопка добавления -->
+    <button class="icon-add-button" id="addIncidentBtn">
+        <img src="/web/static/icons/addInc.png" alt="Добавить инцидент">
+    </button>
+</div>
+
+</body>
+</html>

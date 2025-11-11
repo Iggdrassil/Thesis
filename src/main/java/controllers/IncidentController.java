@@ -3,23 +3,55 @@ import database.DAO.IncidentDAO;
 import database.DTO.IncidentRequestDTO;
 import database.DTO.IncidentResponseDTO;
 import database.models.Incident;
+import database.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@RestController
+@Controller
 @RequestMapping("/incidents")
 public class IncidentController {
 
     private static final Logger log = LoggerFactory.getLogger(IncidentController.class);
     private final IncidentDAO incidentDAO;
 
+    @Autowired
     public IncidentController(IncidentDAO incidentDAO) {
         this.incidentDAO = incidentDAO;
+    }
+
+    // Отображение страницы инцидентов
+    @GetMapping
+    public String incidentsPage(@RequestParam(defaultValue = "1") int page,
+                                Model model,
+                                Principal principal) {
+        int pageSize = 10; // Размер страницы — можно вынести в конфигурацию
+
+        // Получаем все инциденты
+        List<Incident> allIncidents = incidentDAO.getAllIncidents();
+        int totalPages = (int) Math.ceil((double) allIncidents.size() / pageSize);
+
+        // Вычисляем подсписок для текущей страницы
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, allIncidents.size());
+        List<Incident> incidentsOnPage = allIncidents.subList(start, end);
+
+        // Добавляем данные в модель
+        model.addAttribute("currentUser", principal.getName());
+        model.addAttribute("incidents", incidentsOnPage);
+        model.addAttribute("page", page);
+        model.addAttribute("totalPages", totalPages);
+
+        // Возвращаем страницу
+        return "incidents"; // incidents.html в templates/
     }
 
     /**
