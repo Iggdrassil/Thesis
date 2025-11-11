@@ -1,0 +1,138 @@
+package controllers;
+import database.DAO.IncidentDAO;
+import database.DTO.IncidentRequestDTO;
+import database.DTO.IncidentResponseDTO;
+import database.models.Incident;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/incidents")
+public class IncidentController {
+
+    private static final Logger log = LoggerFactory.getLogger(IncidentController.class);
+    private final IncidentDAO incidentDAO;
+
+    public IncidentController(IncidentDAO incidentDAO) {
+        this.incidentDAO = incidentDAO;
+    }
+
+    /**
+     * Получить список всех инцидентов
+     */
+    @GetMapping("/list")
+    public ResponseEntity<List<IncidentResponseDTO>> getAllIncidents(
+            @RequestParam(value = "page", required = false) Integer page) {
+
+        List<Incident> allIncidents = incidentDAO.getAllIncidents();
+
+        // Если передан параметр page — делаем простую пагинацию
+        int pageSize = 10;
+        if (page != null && page > 0) {
+            int fromIndex = (page - 1) * pageSize;
+            if (fromIndex >= allIncidents.size()) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
+            int toIndex = Math.min(fromIndex + pageSize, allIncidents.size());
+            allIncidents = allIncidents.subList(fromIndex, toIndex);
+        }
+
+        List<IncidentResponseDTO> response = allIncidents.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Добавить новый инцидент
+     */
+    @PostMapping("/add")
+    public ResponseEntity<?> addIncident(@RequestBody IncidentRequestDTO dto) {
+        log.info("Adding incident: {}", dto.getTitle());
+
+        if (incidentDAO.isIncidentExists(dto.getTitle())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Инцидент с таким названием уже существует");
+        }
+
+        Optional<Incident> added = incidentDAO.addIncident(
+                dto.getTitle(),
+                dto.getDescription(),
+                dto.getAuthor(),
+                dto.getCategory(),
+                dto.getLevel(),
+                dto.getRecommendations()
+        );
+
+        return added
+                .map(incident -> ResponseEntity.status(HttpStatus.CREATED).body(toDto(incident)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    }
+
+    /**
+     * Удалить инцидент по ID
+     */
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteIncident(@PathVariable("id") UUID id) {
+        log.info("Deleting incident: {}", id);
+
+        Optional<Incident> deleted = incidentDAO.deleteIncident(id);
+        if (deleted.isPresent()) {
+            return ResponseEntity.ok(toDto(deleted.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Инцидент не найден");
+        }
+    }
+
+    /**
+     * Изменить инцидент (частичное обновление)
+     */
+    @PatchMapping("/edit/{id}")
+    public ResponseEntity<?> editIncident(@PathVariable("id") UUID id,
+                                          @RequestBody IncidentRequestDTO dto) {
+        log.info("Editing incident: {}", id);
+
+        Optional<Incident> existing = incidentDAO.findIncident(id);
+        if (existing.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Инцидент не найден");
+        }
+
+        Incident old = existing.get();
+        Optional<Incident> updated = incidentDAO.editIncident(
+                id,
+                dto.getTitle() != null ? dto.getTitle() : old.getTitle(),
+                dto.getDescription() != null ? dto.getDescription() : old.getDescription(),
+                dto.getCategory() != null ? dto.getCategory() : old.getIncidentCategory(),
+                dto.getLevel() != null ? dto.getLevel() : old.getIncidentLevel(),
+                dto.getRecommendations() != null ? dto.getRecommendations() : old.getIncidentRecommendations()
+        );
+
+        return updated
+                .map(incident -> ResponseEntity.ok(toDto(incident)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    }
+
+    /**
+     * Конвертация в DTO
+     */
+    private IncidentResponseDTO toDto(Incident incident) {
+        return new IncidentResponseDTO(
+                incident.getId(),
+                incident.getTitle(),
+                incident.getDescription(),
+                incident.getAuthor(),
+                incident.getCreationDate(),
+                incident.getUpdatedDate(),
+                incident.getIncidentCategory(),
+                incident.getIncidentLevel(),
+                incident.getIncidentRecommendations()
+        );
+    }
+}
