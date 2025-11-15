@@ -49,9 +49,13 @@
 
                 <div class="incident-actions">
                     <button title="Редактировать"
-                            th:onclick="'openEditIncident(\\'' + ${incident.id} + '\\')'">✏️</button>
+                            th:onclick="'openEditIncident(\\'' + ${incident.id} + '\\')'">
+                        <img src="/web/static/icons/edit.png" alt="Редактировать инцидент">
+                    </button>
                     <button title="Удалить"
-                            th:onclick="'deleteIncident(\\'' + ${incident.id} + '\\')'">🗑️</button>
+                            th:onclick="'deleteIncident(\\'' + ${incident.id} + '\\')'">
+                        <img src="/web/static/icons/delete.png" alt="Удалить инцидент">
+                        ️</button>
                 </div>
             </div>
         </div>
