@@ -16,5 +16,5 @@ public enum IncidentCategory {
     SUSPICIOUS_ACTIVITY("Подозрительная активность"),
     OTHER("Другое");
 
-    private final String name;
+    private final String label;
 }

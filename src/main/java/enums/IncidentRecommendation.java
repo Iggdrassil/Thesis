@@ -23,6 +23,6 @@ public enum IncidentRecommendation {
     PERFORM_SECURITY_AUDIT("Провести дополнительный аудит безопасности после инцидента"),
     UPDATE_SECURITY_POLICIES("Пересмотреть и обновить политики информационной безопасности");
 
-    private final String localizedValue;
+    private final String label;
 
 }

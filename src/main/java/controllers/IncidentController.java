@@ -1,13 +1,17 @@
 package controllers;
+
 import database.DAO.IncidentDAO;
 import database.DTO.IncidentRequestDTO;
 import database.DTO.IncidentResponseDTO;
 import database.models.Incident;
-import database.models.User;
+import enums.IncidentCategory;
+import enums.IncidentLevel;
+import enums.IncidentRecommendation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +25,7 @@ import java.util.stream.Collectors;
 public class IncidentController {
 
     private static final Logger log = LoggerFactory.getLogger(IncidentController.class);
+    private static final int pageSize = 10;
     private final IncidentDAO incidentDAO;
 
     @Autowired
@@ -33,7 +38,6 @@ public class IncidentController {
     public String incidentsPage(@RequestParam(defaultValue = "1") int page,
                                 Model model,
                                 Principal principal) {
-        int pageSize = 10; // Размер страницы — можно вынести в конфигурацию
 
         // Получаем все инциденты
         List<Incident> allIncidents = incidentDAO.getAllIncidents();
@@ -64,7 +68,6 @@ public class IncidentController {
         List<Incident> allIncidents = incidentDAO.getAllIncidents();
 
         // Если передан параметр page — делаем простую пагинацию
-        int pageSize = 10;
         if (page != null && page > 0) {
             int fromIndex = (page - 1) * pageSize;
             if (fromIndex >= allIncidents.size()) {
@@ -150,6 +153,34 @@ public class IncidentController {
                 .map(incident -> ResponseEntity.ok(toDto(incident)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
+
+    @GetMapping("/categories")
+    @ResponseBody
+    public List<EnumLocalizedDto> getCategories() {
+        return Arrays.stream(IncidentCategory.values())
+                .map(c -> new EnumLocalizedDto(c.name(), c.getLabel()))
+                .toList();
+    }
+
+    @GetMapping("/levels")
+    @ResponseBody
+    public List<EnumLocalizedDto> getLevels() {
+        return Arrays.stream(IncidentLevel.values())
+                .map(l -> new EnumLocalizedDto(l.name(), l.getLabel()))
+                .toList();
+    }
+
+    @GetMapping("/recommendations")
+    @ResponseBody
+    public List<EnumLocalizedDto> getRecommendations() {
+        return Arrays.stream(IncidentRecommendation.values())
+                .map(r -> new EnumLocalizedDto(r.name(), r.getLabel()))
+                .toList();
+    }
+
+
+    public record EnumLocalizedDto(String value, String label) {}
+
 
     /**
      * Конвертация в DTO

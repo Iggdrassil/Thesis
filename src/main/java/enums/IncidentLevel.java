@@ -11,6 +11,6 @@ public enum IncidentLevel {
     MEDIUM("Средний", 2),
     LOW("Низкий", 3);
 
-    private final String name;
+    private final String label;
     private final int level;
 }
