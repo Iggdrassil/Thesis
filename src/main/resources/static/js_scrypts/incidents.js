@@ -6,6 +6,8 @@ const incidentCloseBtn = document.getElementById("incidentCloseBtn");
 const recsCloseBtn = document.getElementById("recsCloseBtn");
 const recsDoneBtn = document.getElementById("recsDoneBtn");
 const cancelIncidentBtn = document.getElementById("cancelIncidentBtn");
+const backButton = document.getElementById("backButton");
+const logoutButton = document.getElementById("logoutButton");
 
 const createButton = document.getElementById("createIncidentBtn");
 const titleInput = document.getElementById("incidentTitle");
@@ -175,3 +177,14 @@ async function submitCreateIncident(){
         alert("Ошибка сети");
     }
 }
+
+// Кнопка выхода
+logoutButton.addEventListener("click", () => {
+    fetch("/logout", { method: "POST" })
+        .then(() => window.location.href = "/login");
+});
+
+// Кнопка назад — возвращаемся на предыдущее меню
+backButton.addEventListener("click", () => {
+    window.location.href = "/main";
+});
