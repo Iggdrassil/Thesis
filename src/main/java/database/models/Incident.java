@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,8 +19,8 @@ public class Incident {
     private String title;
     private String description;
     private String author;
-    private LocalDate creationDate;
-    private LocalDate updatedDate;
+    private LocalDateTime creationDate;
+    private LocalDateTime updatedDate;
     private IncidentCategory incidentCategory;
     private IncidentLevel incidentLevel;
     private List<IncidentRecommendation> incidentRecommendations;

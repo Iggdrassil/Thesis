@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,7 @@ public class IncidentDAO {
         String sql = "INSERT INTO incidents (id, title, description, author, creation_date, updated_date, " +
                 "incident_category, incident_level, incident_recommendations) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         UUID id = UUID.randomUUID();
-        LocalDate now = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
 
         try (Connection conn = database.createConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -194,8 +195,8 @@ public class IncidentDAO {
         String title = rs.getString("title");
         String description = rs.getString("description");
         String author = rs.getString("author");
-        LocalDate creationDate = LocalDate.parse(rs.getString("creation_date"));
-        LocalDate updatedDate = LocalDate.parse(rs.getString("updated_date"));
+        LocalDateTime creationDate = LocalDateTime.parse(rs.getString("creation_date"));
+        LocalDateTime updatedDate = LocalDateTime.parse(rs.getString("updated_date"));
         IncidentCategory category = IncidentCategory.valueOf(rs.getString("incident_category"));
         IncidentLevel level = IncidentLevel.valueOf(rs.getString("incident_level"));
 
