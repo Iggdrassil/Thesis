@@ -48,11 +48,12 @@
                 </div>
 
                 <div class="incident-meta2">
-                    <span class="incident-cat"
-                          th:text="${incident.incidentCategory.getLabel()}"
-                          th:attr="data-full-text=${incident.incidentCategory.getLabel()}">
-                        OTHER
-                    </span>
+                    <div class="incident-cat"
+                         th:attr="data-full-text=${incident.incidentCategory.getLabel()}">
+                        <span class="cat-text"
+                            th:text="${incident.incidentCategory.getLabel()}">
+                        </span>
+                    </div>
                 </div>
 
                 <div class="incident-actions">
