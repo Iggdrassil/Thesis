@@ -36,14 +36,22 @@
                     <span th:text="${incident.description}">Описание инцидента</span>
                 </div>
 
-                <div class="incident-meta">
+                <div class="incident-meta1">
                     <span th:text="${#temporals.format(incident.creationDate, 'HH:mm:ss dd.MM.yyyy')}">
                         00:00:00 01.01.2025
                     </span>
                     <span class="incident-level"
                           th:classappend="${incident.incidentLevel.name().toLowerCase()}"
-                          th:text="${incident.incidentLevel.name()}">
+                          th:text="${incident.incidentLevel.getLabel()}">
                         LOW
+                    </span>
+                </div>
+
+                <div class="incident-meta2">
+                    <span class="incident-cat"
+                          th:text="${incident.incidentCategory.getLabel()}"
+                          th:attr="data-full-text=${incident.incidentCategory.getLabel()}">
+                        OTHER
                     </span>
                 </div>
 
@@ -55,7 +63,7 @@
                     <button title="Удалить"
                             th:onclick="'deleteIncident(\\'' + ${incident.id} + '\\')'">
                         <img src="/web/static/icons/delete.png" alt="Удалить инцидент">
-                        ️</button>
+                    </button>
                 </div>
             </div>
         </div>

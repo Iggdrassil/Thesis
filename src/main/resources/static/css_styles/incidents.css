@@ -89,31 +89,39 @@ header {
 
 /* Одиночный инцидент */
 .incident-item {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 100px; /* три равные + фиксированная под кнопки */
     align-items: center;
+    text-align: center; /* всё в колонках по центру */
+
     border-bottom: 1px solid #ddd;
-    padding: 10px 0;
+    padding: 12px 0;
+    gap: 10px;
+}
+
+.incident-info,
+.incident-meta1,
+.incident-meta2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; /* центрирование по горизонтали */
+    text-align: center;
 }
 
 .incident-info {
     display: flex;
     flex-direction: column;
-    max-width: 60%;
+    justify-content: center;
+    align-items: flex-start;   /* <-- важное изменение */
+    text-align: left;          /* <-- важное изменение */
 }
 
 .incident-info strong {
     font-weight: 600;
 }
 
-.incident-meta {
-    display: flex;
-    flex-direction: column;
-    text-align: right;
-    font-size: 0.9rem;
-    color: #555;
-}
-
+/* ВСЕ уровни — одинаковой ширины */
 .incident-level {
     border-radius: 6px;
     padding: 2px 6px;
@@ -122,6 +130,68 @@ header {
     font-size: 0.9rem;
     margin-top: 5px;
     display: inline-block;
+    text-align: center;
+
+    width: 130px;            /* <-- одинаковая ширина для всех уровней */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ВСЕ категории — одинаковой ширины */
+.incident-cat {
+    background-color: #7f7f7f;
+    border-radius: 6px;
+    padding: 3px 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: inline-block;
+    text-align: center;
+
+    width: 130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    position: relative; /* важно для tooltip */
+    cursor: default;
+}
+
+/* Tooltip при наведении */
+.incident-cat:hover::after {
+    content: attr(data-full-text);   /* берём полный текст прямо из HTML */
+    position: absolute;
+    top: -40px;                      /* над тегом */
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: #222;
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    z-index: 10;
+}
+
+/* Маленький треугольник под тултипом */
+.incident-cat:hover::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    border-width: 6px;
+    border-style: solid;
+    border-color: #222 transparent transparent transparent; /* маленькая стрелка */
+}
+
+.incident-meta1, .incident-meta2 {
+    text-align: right;
 }
 
 .incident-level.high {
@@ -140,8 +210,11 @@ header {
 /* Кнопки действий */
 .incident-actions {
     display: flex;
+    justify-content: flex-end; /* <-- выравниваем кнопки вправо */
+    align-items: center;        /* <-- вертикальное выравнивание */
     gap: 10px;
 }
+
 
 .incident-actions button {
     background: none;
@@ -206,17 +279,6 @@ header {
     height: 50px;
 }
 
-/*!* Модалки (если понадобятся) *!
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}*/
-
 .modal-window {
     background: white;
     padding: 2rem;
@@ -233,37 +295,6 @@ header {
     margin-top: 0;
     font-size: 1.3rem;
 }
-
-/*
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.modal-actions button {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    cursor: pointer;
-}
-
-.modal-actions .danger {
-    background: #222;
-    color: white;
-    border: none;
-}
-*/
-
-/*.modal-close {
-    background: none;
-    border: none;
-    font-size: 20px;
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    cursor: pointer;
-}*/
 
 /* Ошибки */
 .error-window {
