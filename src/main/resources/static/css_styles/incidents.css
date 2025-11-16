@@ -69,7 +69,7 @@ header {
     width: 95%;
     min-height: 400px;
     max-height: 450px;
-    overflow: hidden;
+    overflow: visible;
     justify-content: space-between;
     transition: height 0.3s ease;
 }
@@ -139,30 +139,36 @@ header {
 }
 
 /* ВСЕ категории — одинаковой ширины */
+/* Внешний контейнер — НЕ режет ::after, только позиционирует tooltip */
 .incident-cat {
+    display: inline-block;
+    position: relative; /* для позиционирования tooltip */
+    cursor: default;
+}
+
+/* Внутренний контейнер — режет текст */
+.incident-cat .cat-text {
     background-color: #7f7f7f;
     border-radius: 6px;
     padding: 3px 10px;
     color: white;
     font-weight: bold;
     font-size: 0.9rem;
-    display: inline-block;
     text-align: center;
 
     width: 130px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: inline-block;
 
-    position: relative; /* важно для tooltip */
-    cursor: default;
+    white-space: nowrap;
+    overflow: hidden;       /* режет текст */
+    text-overflow: ellipsis;
 }
 
-/* Tooltip при наведении */
+/* Tooltip */
 .incident-cat:hover::after {
-    content: attr(data-full-text);   /* берём полный текст прямо из HTML */
+    content: attr(data-full-text);
     position: absolute;
-    top: -40px;                      /* над тегом */
+    bottom: -40px;
     left: 50%;
     transform: translateX(-50%);
 
@@ -174,20 +180,23 @@ header {
 
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-    z-index: 10;
+    z-index: 9999;
+
+    pointer-events: none;
 }
 
-/* Маленький треугольник под тултипом */
+/* Маленькая стрелка */
 .incident-cat:hover::before {
     content: "";
     position: absolute;
-    top: -10px;
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
 
     border-width: 6px;
     border-style: solid;
-    border-color: #222 transparent transparent transparent; /* маленькая стрелка */
+    border-color: #222 transparent transparent transparent;
+    z-index: 9999;
 }
 
 .incident-meta1, .incident-meta2 {

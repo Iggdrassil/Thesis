@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class IncidentController {
 
     private static final Logger log = LoggerFactory.getLogger(IncidentController.class);
-    private static final int pageSize = 10;
+    private static final int pageSize = 5;
     private final IncidentDAO incidentDAO;
 
     @Autowired
