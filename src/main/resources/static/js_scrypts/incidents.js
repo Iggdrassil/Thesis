@@ -221,7 +221,7 @@ function openViewIncidentModal(incident) {
     incidentUpdated.textContent = incident.updateDate ?? "—";
     incidentAuthor.textContent = incident.author;
     incidentDesc.textContent = incident.description ?? "—";
-    incidentCategoryView.textContent = incident.categoryLabel ?? "—";
+    incidentCategoryView.textContent = incident.category ?? "—";
 
     // Рекомендации — первые 5
     recShort.innerHTML = "";
@@ -255,7 +255,7 @@ showAllRecsBtn.addEventListener("click", () => {
     recFull.style.display = recFull.style.display === "none" ? "block" : "none";
     showAllRecsBtn.textContent =
         recFull.style.display === "none"
-            ? "Посмотреть все рекомендации"
+            ? "Показать остальные рекомедации"
             : "Скрыть";
 });
 
@@ -273,7 +273,7 @@ async function viewIncident(id) {
         // {
         //   id, title, description, author,
         //   creationDate, updateDate,
-        //   categoryLabel,
+        //   category,
         //   level,   // HIGH / MEDIUM / LOW
         //   recommendations: ["...", "..."]
         // }
@@ -285,13 +285,6 @@ async function viewIncident(id) {
         alert("Ошибка сети");
     }
 }
-
-document.querySelectorAll('.incident-item').forEach(item => {
-    item.addEventListener('click', () => {
-        const id = item.dataset.id;
-        viewIncident(id);
-    });
-});
 
 document.querySelectorAll('.edit-btn').forEach(btn => {
     btn.addEventListener('click', e => {
@@ -308,5 +301,38 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
         openEditIncident(id);
     });
 });
+
+// --- делегированный обработчик кликов по списку инцидентов ---
+document.addEventListener("DOMContentLoaded", () => {
+    const list = document.querySelector(".incident-list");
+    if (!list) return;
+
+    list.addEventListener("click", (event) => {
+
+        // если кликнули по edit-btn
+        if (event.target.closest(".edit-btn")) {
+            event.stopPropagation();
+            const id = event.target.closest(".edit-btn").dataset.id;
+            openEditIncident(id);
+            return;
+        }
+
+        // если кликнули по delete-btn
+        if (event.target.closest(".delete-btn")) {
+            event.stopPropagation();
+            const id = event.target.closest(".delete-btn").dataset.id;
+            openDeleteIncident(id);
+            return;
+        }
+
+        // если кликнули по .incident-item
+        const item = event.target.closest(".incident-item");
+        if (item) {
+            const id = item.dataset.id;
+            if (id) viewIncident(id);
+        }
+    });
+});
+
 
 
