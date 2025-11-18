@@ -23,4 +23,6 @@ public class IncidentResponseDTO {
     private IncidentCategory category;
     private IncidentLevel level;
     private List<IncidentRecommendation> recommendations;
+    private String categoryLocalized;
+    private List<String> recommendationsLocalized;
 }

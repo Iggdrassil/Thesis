@@ -32,7 +32,6 @@ const recShort = document.getElementById("incidentRecsShort");
 const recFull = document.getElementById("incidentRecsFull");
 const showAllRecsBtn = document.getElementById("showAllRecsBtn");
 
-
 let selectedRecommendations = [];
 
 // --- события открытия/закрытия ---
@@ -221,14 +220,14 @@ function openViewIncidentModal(incident) {
     incidentUpdated.textContent = incident.updateDate ?? "—";
     incidentAuthor.textContent = incident.author;
     incidentDesc.textContent = incident.description ?? "—";
-    incidentCategoryView.textContent = incident.category ?? "—";
+    incidentCategoryView.textContent = incident.categoryLocalized ?? "—";
 
     // Рекомендации — первые 5
     recShort.innerHTML = "";
     recFull.innerHTML = "";
 
-    if (incident.recommendations && incident.recommendations.length > 0) {
-        const arr = incident.recommendations;
+    if (incident.recommendationsLocalized && incident.recommendationsLocalized.length > 0) {
+        const arr = incident.recommendationsLocalized;
 
         arr.slice(0, 5).forEach(r => {
             recShort.insertAdjacentHTML("beforeend", `<li>${r}</li>`);

@@ -191,6 +191,7 @@ public class IncidentController {
                     .body("Инцидент не найден");
         }
 
+
         return ResponseEntity.ok(toDto(incident.get()));
     }
 
@@ -203,6 +204,12 @@ public class IncidentController {
      * Конвертация в DTO
      */
     private IncidentResponseDTO toDto(Incident incident) {
+        List<String> recLoc = new ArrayList<>();
+
+        if (!incident.getIncidentRecommendations().isEmpty()) {
+            incident.getIncidentRecommendations().forEach(incidentRecommendation -> recLoc.add(incidentRecommendation.getLabel()));
+        }
+
         return new IncidentResponseDTO(
                 incident.getId(),
                 incident.getTitle(),
@@ -212,7 +219,8 @@ public class IncidentController {
                 incident.getUpdatedDate(),
                 incident.getIncidentCategory(),
                 incident.getIncidentLevel(),
-                incident.getIncidentRecommendations()
+                incident.getIncidentRecommendations(), incident.getIncidentCategory().getLabel(),
+                recLoc
         );
     }
 }
