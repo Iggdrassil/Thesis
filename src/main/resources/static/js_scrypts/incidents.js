@@ -17,6 +17,21 @@ const levelSelect = document.getElementById("incidentLevel");
 const recsList = document.getElementById("recsList");
 const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+const viewIncidentModal = document.getElementById("viewIncidentModal");
+const viewIncidentCloseBtn = document.getElementById("viewIncidentCloseBtn");
+
+const incidentShieldIcon = document.getElementById("incidentShieldIcon");
+const incidentViewTitle = document.getElementById("incidentViewTitle");
+const incidentCreated = document.getElementById("incidentCreated");
+const incidentUpdated = document.getElementById("incidentUpdated");
+const incidentAuthor = document.getElementById("incidentAuthor");
+const incidentDesc = document.getElementById("incidentDesc");
+const incidentCategoryView = document.getElementById("incidentCategoryView");
+
+const recShort = document.getElementById("incidentRecsShort");
+const recFull = document.getElementById("incidentRecsFull");
+const showAllRecsBtn = document.getElementById("showAllRecsBtn");
+
 
 let selectedRecommendations = [];
 
@@ -27,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     addIncidentBtn.addEventListener("click", openIncidentModal);
     incidentCloseBtn?.addEventListener("click", closeIncidentModal);
     cancelIncidentBtn?.addEventListener("click", closeIncidentModal);
+    viewIncidentCloseBtn.addEventListener("click", closeViewIncidentModal);
 
     chooseRecsBtn?.addEventListener("click", openRecsModal);
     recsCloseBtn?.addEventListener("click", closeRecsModal);
@@ -188,3 +204,109 @@ logoutButton.addEventListener("click", () => {
 backButton.addEventListener("click", () => {
     window.location.href = "/main";
 });
+
+function openViewIncidentModal(incident) {
+    // Заголовок + иконка
+    incidentViewTitle.textContent = incident.title;
+
+    if (incident.level === "HIGH")
+        incidentShieldIcon.src = "/web/static/icons/lvlHigh.png";
+    else if (incident.level === "MEDIUM")
+        incidentShieldIcon.src = "/web/static/icons/lvlMed.png";
+    else
+        incidentShieldIcon.src = "/web/static/icons/lvlLow.png";
+
+    // Простые поля
+    incidentCreated.textContent = incident.creationDate;
+    incidentUpdated.textContent = incident.updateDate ?? "—";
+    incidentAuthor.textContent = incident.author;
+    incidentDesc.textContent = incident.description ?? "—";
+    incidentCategoryView.textContent = incident.categoryLabel ?? "—";
+
+    // Рекомендации — первые 5
+    recShort.innerHTML = "";
+    recFull.innerHTML = "";
+
+    if (incident.recommendations && incident.recommendations.length > 0) {
+        const arr = incident.recommendations;
+
+        arr.slice(0, 5).forEach(r => {
+            recShort.insertAdjacentHTML("beforeend", `<li>${r}</li>`);
+        });
+
+        if (arr.length > 5) {
+            showAllRecsBtn.style.display = "inline";
+            recFull.innerHTML = arr.slice(5).map(r => `<li>${r}</li>`).join("");
+        } else {
+            showAllRecsBtn.style.display = "none";
+        }
+    }
+
+    viewIncidentModal.style.display = "flex";
+    viewIncidentModal.setAttribute("aria-hidden", "false");
+}
+
+function closeViewIncidentModal() {
+    viewIncidentModal.style.display = "none";
+    viewIncidentModal.setAttribute("aria-hidden", "true");
+}
+
+showAllRecsBtn.addEventListener("click", () => {
+    recFull.style.display = recFull.style.display === "none" ? "block" : "none";
+    showAllRecsBtn.textContent =
+        recFull.style.display === "none"
+            ? "Посмотреть все рекомендации"
+            : "Скрыть";
+});
+
+async function viewIncident(id) {
+    try {
+        const resp = await fetch(`/incidents/${id}`);
+        if (!resp.ok) {
+            alert("Не удалось загрузить инцидент");
+            return;
+        }
+
+        const data = await resp.json();
+
+        // структура ожидается такая:
+        // {
+        //   id, title, description, author,
+        //   creationDate, updateDate,
+        //   categoryLabel,
+        //   level,   // HIGH / MEDIUM / LOW
+        //   recommendations: ["...", "..."]
+        // }
+
+        openViewIncidentModal(data);
+
+    } catch (e) {
+        console.error(e);
+        alert("Ошибка сети");
+    }
+}
+
+document.querySelectorAll('.incident-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const id = item.dataset.id;
+        viewIncident(id);
+    });
+});
+
+document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        openEditIncident(id);
+    });
+});
+
+document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        openEditIncident(id);
+    });
+});
+
+

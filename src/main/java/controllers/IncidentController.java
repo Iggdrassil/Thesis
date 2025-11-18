@@ -178,6 +178,23 @@ public class IncidentController {
                 .toList();
     }
 
+    /**
+     * Получить один инцидент по ID
+     */
+    @GetMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<?> getIncidentById(@PathVariable("id") UUID id) {
+        Optional<Incident> incident = incidentDAO.findIncident(id);
+
+        if (incident.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Инцидент не найден");
+        }
+
+        return ResponseEntity.ok(toDto(incident.get()));
+    }
+
+
 
     public record EnumLocalizedDto(String value, String label) {}
 

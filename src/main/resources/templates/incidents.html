@@ -30,7 +30,9 @@
 
         <!-- Список инцидентов -->
         <div class="incident-list" th:if="${!#lists.isEmpty(incidents)}">
-            <div class="incident-item" th:each="incident : ${incidents}">
+            <div class="incident-item"
+                 th:each="incident : ${incidents}"
+                 th:attr="data-id=${incident.id}">
                 <div class="incident-info">
                     <strong th:text="${incident.title}">Название инцидента</strong>
                     <span th:text="${incident.description}">Описание инцидента</span>
@@ -57,12 +59,12 @@
                 </div>
 
                 <div class="incident-actions">
-                    <button title="Редактировать"
-                            th:onclick="'openEditIncident(\\'' + ${incident.id} + '\\')'">
+                    <button class="edit-btn" title="Редактировать"
+                            th:attr="data-id=${incident.id}">
                         <img src="/web/static/icons/edit.png" alt="Редактировать инцидент">
                     </button>
-                    <button title="Удалить"
-                            th:onclick="'deleteIncident(\\'' + ${incident.id} + '\\')'">
+                    <button class="delete-btn" title="Удалить"
+                            th:attr="data-id=${incident.id}">
                         <img src="/web/static/icons/delete.png" alt="Удалить инцидент">
                     </button>
                 </div>
@@ -139,6 +141,54 @@
             <div class="modal-actions" style="justify-content: center;">
                 <button id="recsDoneBtn">Готово</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛКА: ПРОСМОТР ИНЦИДЕНТА -->
+<div id="viewIncidentModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-frame-incident-data" style="max-width: 850px; width: 90%;">
+        <div class="modal-content">
+            <button class="modal-close" id="viewIncidentCloseBtn">✖</button>
+
+            <div class="view-header">
+                <img id="incidentShieldIcon" src="" alt="shield" class="shield-icon">
+                <h2 id="incidentViewTitle">Название инцидента</h2>
+            </div>
+
+            <div class="view-block">
+                <label>Дата и время заведения</label>
+                <div id="incidentCreated"></div>
+            </div>
+
+            <div class="view-block">
+                <label>Дата и время обновления</label>
+                <div id="incidentUpdated"></div>
+            </div>
+
+            <div class="view-block">
+                <label>Автор</label>
+                <div id="incidentAuthor"></div>
+            </div>
+
+            <div class="view-block">
+                <label>Описание инцидента</label>
+                <div id="incidentDesc"></div>
+            </div>
+
+            <div class="view-block">
+                <label>Категория</label>
+                <div id="incidentCategoryView"></div>
+            </div>
+
+            <div class="view-block">
+                <label>Рекомендации</label>
+                <ul id="incidentRecsShort"></ul>
+                <button id="showAllRecsBtn" class="link-btn" style="display:none;">Посмотреть все рекомендации</button>
+
+                <ul id="incidentRecsFull" style="display:none; margin-top:10px;"></ul>
+            </div>
+
         </div>
     </div>
 </div>
