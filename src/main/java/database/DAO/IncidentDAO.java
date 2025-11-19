@@ -76,7 +76,7 @@ public class IncidentDAO {
         String sql = "UPDATE incidents SET title = ?, description = ?, updated_date = ?, " +
                 "incident_category = ?, incident_level = ?, incident_recommendations = ? WHERE id = ?";
 
-        LocalDate updatedDate = LocalDate.now();
+        LocalDateTime updatedDate = LocalDateTime.now();
 
         try (Connection conn = database.createConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

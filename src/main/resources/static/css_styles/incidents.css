@@ -328,7 +328,7 @@ header {
     z-index: 2000;
 }
 
-/* модалки — рамка + белое содержимое (как на твоих скринах) */
+/* модалки — рамка + белое содержимое */
 .modal-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content:center;
     background: rgba(0,0,0,0.45); z-index: 2000; }
 
@@ -499,3 +499,15 @@ header {
     flex-direction: column;
     gap: 12px;
 }
+
+#editIncidentTitle[disabled] {
+    background: #f3f3f3;
+    color: #666;
+}
+
+/* гарантия, что модалка рекомендаций поверх остальных модалок */
+#recsModal { z-index: 3005; }
+#editIncidentModal { z-index: 2005; }
+#incidentModal { z-index: 2000; }
+
+

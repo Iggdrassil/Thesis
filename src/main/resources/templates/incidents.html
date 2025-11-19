@@ -145,6 +145,43 @@
     </div>
 </div>
 
+<!-- МОДАЛКА: РЕДАКТИРОВАНИЕ ИНЦИДЕНТА -->
+<div id="editIncidentModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-frame">
+        <div class="modal-content">
+            <button class="modal-close" id="editIncidentCloseBtn" aria-label="Закрыть">✖</button>
+            <h2 class="modal-title">Редактирование инцидента</h2>
+
+            <!-- НАЗВАНИЕ (нельзя менять) -->
+            <label>Название</label>
+            <input id="editIncidentTitle" type="text" disabled>
+
+            <!-- ОПИСАНИЕ -->
+            <label>Описание</label>
+            <textarea id="editIncidentDescription" placeholder="Введите описание"></textarea>
+
+            <!-- КАТЕГОРИЯ -->
+            <label>Категория</label>
+            <select id="editIncidentCategory">
+                <option value="">Выберите категорию</option>
+            </select>
+
+            <!-- УРОВЕНЬ -->
+            <label>Уровень важности</label>
+            <select id="editIncidentLevel">
+                <option value="">Выберите уровень важности</option>
+            </select>
+
+            <div class="modal-actions">
+                <button id="cancelIncidentEditBtn">Отмена</button>
+                <button id="editChooseRecsBtn" class="danger">Выбрать рекомендации</button>
+                <button id="saveIncidentEditBtn" class="danger">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- МОДАЛКА: ПРОСМОТР ИНЦИДЕНТА -->
 <div id="viewIncidentModal" class="modal-overlay" aria-hidden="true">
     <div class="modal-frame-incident-data" style="max-width: 850px; width: 90%;">

@@ -32,6 +32,20 @@ const recShort = document.getElementById("incidentRecsShort");
 const recFull = document.getElementById("incidentRecsFull");
 const showAllRecsBtn = document.getElementById("showAllRecsBtn");
 
+const editModal = document.getElementById("editIncidentModal");
+const editIncidentCloseBtn = document.getElementById("editIncidentCloseBtn");
+const cancelIncidentEditBtn = document.getElementById("cancelIncidentEditBtn");
+const saveIncidentEditBtn = document.getElementById("saveIncidentEditBtn");
+const editChooseRecsBtn = document.getElementById("editChooseRecsBtn");
+
+const editTitleInput = document.getElementById("editIncidentTitle");
+const editDescInput = document.getElementById("editIncidentDescription");
+const editCategorySelect = document.getElementById("editIncidentCategory");
+const editLevelSelect = document.getElementById("editIncidentLevel");
+
+let editIncidentId = null;
+let editSelectedRecommendations = [];
+
 let selectedRecommendations = [];
 
 // --- события открытия/закрытия ---
@@ -43,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cancelIncidentBtn?.addEventListener("click", closeIncidentModal);
     viewIncidentCloseBtn.addEventListener("click", closeViewIncidentModal);
 
-    chooseRecsBtn?.addEventListener("click", openRecsModal);
+    /*chooseRecsBtn?.addEventListener("click", openRecsModal);*/
     recsCloseBtn?.addEventListener("click", closeRecsModal);
     recsDoneBtn?.addEventListener("click", closeRecsModal);
 
@@ -87,7 +101,6 @@ function closeRecsModal(){
 }
 
 // --- загрузка словарей из бекенда ---
-// ожидание: endpoints возвращают список объектов: { value: "DDOS", label: "Взлом пароля" }
 async function loadDictionaries(){
     try {
         // категории
@@ -99,6 +112,7 @@ async function loadDictionaries(){
             const val = c.value ?? c.name ?? c;
             const label = c.label ?? c.localizedValue ?? c.name ?? c;
             categorySelect.add(new Option(label, val));
+            editCategorySelect.add(new Option(label, val));
         });
 
         // уровни
@@ -109,6 +123,7 @@ async function loadDictionaries(){
             const val = l.value ?? l.name ?? l;
             const label = l.label ?? l.localizedValue ?? l.name ?? l;
             levelSelect.add(new Option(label, val));
+            editLevelSelect.add(new Option(label, val));
         });
 
         // рекомендации
@@ -332,6 +347,140 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+// ------------------------------
+// МОДАЛКА РЕДАКТИРОВАНИЯ
+// -----------------------------
+
+// открыть модалку
+function openEditIncidentModal() {
+    editModal.style.display = "flex";
+    editModal.setAttribute("aria-hidden", "false");
+}
+
+// закрыть модалку
+function closeEditIncidentModal() {
+    editModal.style.display = "none";
+    editModal.setAttribute("aria-hidden", "true");
+
+    editIncidentId = null;
+    editTitleInput.value = "";
+    editDescInput.value = "";
+    editCategorySelect.value = "";
+    editLevelSelect.value = "";
+    editSelectedRecommendations = [];
+}
+
+// кнопки закрытия
+editIncidentCloseBtn.addEventListener("click", closeEditIncidentModal);
+cancelIncidentEditBtn.addEventListener("click", closeEditIncidentModal);
+
+// открыть рекомендаций в режиме редактирования
+editChooseRecsBtn.addEventListener("click", () => {
+    // перед открытием ставим галки выбранных рекомендаций
+    document.querySelectorAll("#recsList input[type='checkbox']").forEach(cb => {
+        cb.checked = editSelectedRecommendations.includes(cb.value);
+    });
+    openRecsModal();
+});
+
+recsDoneBtn.addEventListener("click", () => {
+    // обновляем editSelectedRecommendations
+    editSelectedRecommendations =
+        Array.from(document.querySelectorAll("#recsList input[type='checkbox']:checked"))
+            .map(cb => cb.value);
+
+    closeRecsModal();
+});
+
+// ------------------------------
+// ОТКРЫТИЕ РЕДАКТИРОВАНИЯ
+// ------------------------------
+
+async function openEditIncident(id) {
+    try {
+        // дождаться загрузки словарей (если ещё не загрузились)
+
+        await loadDictionaries;
+
+        const resp = await fetch(`/incidents/${id}`);
+        if (!resp.ok) {
+            alert("Не удалось загрузить данные инцидента");
+            return;
+        }
+
+        const data = await resp.json();
+        editIncidentId = id;
+
+        // заполняем поля
+        editTitleInput.value = data.title;
+        editDescInput.value = data.description ?? "";
+
+
+        // Присваиваем селектам value — опция уже должна существовать после loadDictionaries()
+        editCategorySelect.value = data.category ?? "";
+        editLevelSelect.value = data.level ?? "";
+
+        // рекомендации — backend возвращает (например) ["ANALYZE_LOGS", ...]
+        editSelectedRecommendations = data.recommendations ? [...data.recommendations] : [];
+
+        // Отметим чекбоксы в #recsList (если они есть)
+        document.querySelectorAll("#recsList input[type='checkbox']").forEach(cb => {
+            cb.checked = editSelectedRecommendations.includes(cb.value);
+        });
+
+        openEditIncidentModal();
+
+    } catch (e) {
+        console.error(e);
+        alert("Ошибка сети");
+    }
+}
+
+// ------------------------------
+// ------------------------------
+// СОХРАНЕНИЕ РЕДАКТИРОВАНИЯ
+// ------------------------------
+
+saveIncidentEditBtn.addEventListener("click", () => submitEditIncident());
+
+async function submitEditIncident() {
+    if (!editIncidentId) return;
+
+    const body = {
+        description: editDescInput.value.trim(),
+        category: editCategorySelect.value,
+        level: editLevelSelect.value,
+        recommendations: editSelectedRecommendations
+    };
+
+    try {
+        const headers = {
+            "Content-Type": "application/json",
+            [header]: token
+        };
+
+        const resp = await fetch(`/incidents/edit/${editIncidentId}`, {
+            method: "PATCH",
+            headers,
+            body: JSON.stringify(body),
+            credentials: "same-origin"
+        });
+
+        if (!resp.ok) {
+            alert("Не удалось сохранить изменения");
+            return;
+        }
+
+        closeEditIncidentModal();
+        location.reload(); // единообразно с созданием
+
+    } catch (e) {
+        console.error(e);
+        alert("Ошибка сети");
+    }
+}
+
 
 
 
