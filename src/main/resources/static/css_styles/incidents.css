@@ -77,7 +77,7 @@ header {
 /* Контейнер списка */
 .incident-list {
     flex: 1;
-    overflow-y: auto;
+    /*overflow-y: auto;*/
     display: flex;
     flex-direction: column;
     justify-content: flex-start;

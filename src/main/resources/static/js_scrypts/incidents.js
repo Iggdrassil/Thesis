@@ -319,8 +319,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // если кликнули по delete-btn
         if (event.target.closest(".delete-btn")) {
             event.stopPropagation();
-            const id = event.target.closest(".delete-btn").dataset.id;
-            openDeleteIncident(id);
+
+            const btn = event.target.closest(".delete-btn");
+            const incidentItem = btn.closest(".incident-item"); // карточка инцидента
+            const id = btn.dataset.id;
+            const title = incidentItem.querySelector(".incident-info strong").textContent;
+
+            console.log("ID:", id);
+            console.log("Title:", title);
+
+            openDeleteIncident(id, title); // можно передать и title
             return;
         }
 
@@ -466,11 +474,11 @@ async function submitEditIncident() {
     }
 }
 
-function openDeleteIncident(id) {
+function openDeleteIncident(id, name) {
     currentDeleteId = id;
     const modal = document.getElementById("deleteIncidentModal");
     const title = document.getElementById("deleteIncidentTitle");
-    title.textContent = `Удалить инцидент ${id}?`;
+    title.textContent = `Удалить инцидент ${name}?`;
     modal.style.display = "flex";
 }
 
