@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cancelIncidentBtn?.addEventListener("click", closeIncidentModal);
     viewIncidentCloseBtn.addEventListener("click", closeViewIncidentModal);
 
-    /*chooseRecsBtn?.addEventListener("click", openRecsModal);*/
+    chooseRecsBtn?.addEventListener("click", openRecsModal);
     recsCloseBtn?.addEventListener("click", closeRecsModal);
     recsDoneBtn?.addEventListener("click", closeRecsModal);
 
@@ -232,7 +232,7 @@ function openViewIncidentModal(incident) {
 
     // Простые поля
     incidentCreated.textContent = incident.creationDate;
-    incidentUpdated.textContent = incident.updateDate ?? "—";
+    incidentUpdated.textContent = incident.updatedDate ?? "—";
     incidentAuthor.textContent = incident.author;
     incidentDesc.textContent = incident.description ?? "—";
     incidentCategoryView.textContent = incident.categoryLocalized ?? "—";
