@@ -44,6 +44,7 @@ const editCategorySelect = document.getElementById("editIncidentCategory");
 const editLevelSelect = document.getElementById("editIncidentLevel");
 
 let editIncidentId = null;
+let currentDeleteId = null;
 let editSelectedRecommendations = [];
 
 let selectedRecommendations = [];
@@ -300,22 +301,6 @@ async function viewIncident(id) {
     }
 }
 
-document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-        e.stopPropagation();
-        const id = btn.dataset.id;
-        openEditIncident(id);
-    });
-});
-
-document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-        e.stopPropagation();
-        const id = btn.dataset.id;
-        openEditIncident(id);
-    });
-});
-
 // --- делегированный обработчик кликов по списку инцидентов ---
 document.addEventListener("DOMContentLoaded", () => {
     const list = document.querySelector(".incident-list");
@@ -480,6 +465,50 @@ async function submitEditIncident() {
         alert("Ошибка сети");
     }
 }
+
+function openDeleteIncident(id) {
+    currentDeleteId = id;
+    const modal = document.getElementById("deleteIncidentModal");
+    const title = document.getElementById("deleteIncidentTitle");
+    title.textContent = `Удалить инцидент ${id}?`;
+    modal.style.display = "flex";
+}
+
+// Кнопка отмены
+document.getElementById("cancelDeleteBtn").addEventListener("click", () => {
+    document.getElementById("deleteIncidentModal").style.display = "none";
+    currentDeleteId = null;
+});
+
+// Кнопка подтверждения
+document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
+    if (!currentDeleteId) return;
+
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    try {
+        const response = await fetch(`/incidents/delete/${currentDeleteId}`, {
+            method: "DELETE",
+            headers: { [header]: token },
+            credentials: "same-origin"
+        });
+
+        if (response.ok) {
+            // Успешно удалено
+            document.getElementById("deleteIncidentModal").style.display = "none";
+            currentDeleteId = null;
+            location.reload(); // обновляем список
+        } else if (response.status === 404) {
+            alert("Инцидент не найден");
+        } else {
+            alert("Ошибка при удалении инцидента");
+        }
+    } catch (err) {
+        alert("Ошибка соединения с сервером");
+    }
+});
+
 
 
 
