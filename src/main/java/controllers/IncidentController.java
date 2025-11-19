@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +39,7 @@ public class IncidentController {
     @GetMapping
     public String incidentsPage(@RequestParam(defaultValue = "1") int page,
                                 Model model,
-                                Principal principal) {
+                                @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal) {
 
         // Получаем все инциденты
         List<Incident> allIncidents = incidentDAO.getAllIncidents();
@@ -48,8 +50,13 @@ public class IncidentController {
         int end = Math.min(start + pageSize, allIncidents.size());
         List<Incident> incidentsOnPage = allIncidents.subList(start, end);
 
+        String role = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)  // вернёт "ROLE_ADMIN", "ROLE_USER" и т.д.
+                .findFirst()
+                .orElse("USER");
+        model.addAttribute("role", role);
         // Добавляем данные в модель
-        model.addAttribute("currentUser", principal.getName());
+        model.addAttribute("currentUser", principal.getUsername());
         model.addAttribute("incidents", incidentsOnPage);
         model.addAttribute("page", page);
         model.addAttribute("totalPages", totalPages);

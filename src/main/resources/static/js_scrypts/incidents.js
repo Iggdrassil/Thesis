@@ -43,11 +43,19 @@ const editDescInput = document.getElementById("editIncidentDescription");
 const editCategorySelect = document.getElementById("editIncidentCategory");
 const editLevelSelect = document.getElementById("editIncidentLevel");
 
+const role = document.body.dataset.role; // Thymeleaf вставит значение из сессии
+
 let editIncidentId = null;
 let currentDeleteId = null;
 let editSelectedRecommendations = [];
 
 let selectedRecommendations = [];
+
+if (role === 'ROLE_USER' || role === 'ROLE_AUDITOR') {
+    addIncidentBtn.style.display = 'none';
+    document.querySelectorAll('.edit-btn').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.delete-btn').forEach(el => el.style.display = 'none');
+}
 
 // --- события открытия/закрытия ---
 document.addEventListener("DOMContentLoaded", () => {
