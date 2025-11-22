@@ -16,7 +16,7 @@ if (role === 'ROLE_AUDITOR') {
 function goTo(section) {
     switch (section) {
         case 'stats':
-            window.location.href = '/stats';
+            window.location.href = '/statistics';
             break;
         case 'incidents':
             window.location.href = '/incidents';
