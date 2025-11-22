@@ -1,8 +1,10 @@
+const backButton = document.getElementById("backButton");
+const logoutButton = document.getElementById("logoutButton");
+
 async function loadStats() {
     const categoriesResp = await fetch('/statistics/api/categories');
     const levelsResp = await fetch('/statistics/api/importance');
     const dailyResp = await fetch('/statistics/api/daily?days=30');
-
     const categories = await categoriesResp.json();
     const levels = await levelsResp.json();
     const daily = await dailyResp.json();
@@ -57,5 +59,16 @@ async function loadStats() {
         }
     });
 }
+
+// Кнопка выхода
+logoutButton.addEventListener("click", () => {
+    fetch("/logout", { method: "POST" })
+        .then(() => window.location.href = "/login");
+});
+
+// Кнопка назад — возвращаемся на предыдущее меню
+backButton.addEventListener("click", () => {
+    window.location.href = "/main";
+});
 
 loadStats();
