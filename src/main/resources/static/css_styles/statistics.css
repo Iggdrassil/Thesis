@@ -68,8 +68,7 @@ header {
     flex-direction: column;
     flex: 1;
     width: 95%;
-    min-height: 400px;
-    max-height: 450px;
+    min-height: 750px;
     overflow: visible;
     justify-content: space-between;
     transition: height 0.3s ease;

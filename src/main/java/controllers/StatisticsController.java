@@ -2,8 +2,6 @@ package controllers;
 
 import database.DAO.StatisticsDAO;
 import database.DTO.StatisticsDto;
-import enums.IncidentCategory;
-import enums.IncidentLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/statistics")
