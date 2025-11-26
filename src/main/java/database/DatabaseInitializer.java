@@ -56,6 +56,22 @@ public class DatabaseInitializer {
             stmt.execute(sqlIncidents);
             log.info("Table \"incidents\" created or already exists");
 
+            log.info("Creating \"audit_log\" table if not exists");
+            String sqlAudit = """
+                    CREATE TABLE IF NOT EXISTS audit_log (
+                        id TEXT PRIMARY KEY,
+                        event_type TEXT NOT NULL,
+                        title TEXT NOT NULL,
+                        description TEXT NOT NULL,
+                        username TEXT NOT NULL,
+                        creation_datetime TEXT NOT NULL
+                    );
+                    """;
+
+            stmt.execute(sqlAudit);
+            log.info("Table \"audit_log\" created or already exists");
+
+
             creatingDefaultAdmin();
 
         } catch (SQLException e) {
