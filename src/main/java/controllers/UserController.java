@@ -5,6 +5,7 @@ import database.DTO.UserDTO;
 import database.models.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
@@ -12,6 +13,9 @@ import org.springframework.ui.Model;
 import java.security.Principal;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import services.AuditService;
+
+import static enums.AuditEventType.*;
 
 @Controller
 @RequestMapping("/users")
@@ -19,9 +23,12 @@ public class UserController {
 
     private static final int pageSize = 5;
     private final UserDAO userDAO;
+    private final AuditService auditService;
+    private String actionUser;
 
     @Autowired
-    public UserController(UserDAO userDAO) {
+    public UserController(UserDAO userDAO, AuditService auditService) {
+        this.auditService = auditService;
         this.userDAO = userDAO;
     }
 
@@ -64,16 +71,22 @@ public class UserController {
     @PostMapping("/add")
     @ResponseBody
     public ResponseEntity<?> addUser(@RequestBody UserDTO userDto) {
+        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
         if (userDAO.isUserExists(userDto.getUsername())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
         userDAO.addUser(userDto.getUsername(), userDto.getPassword(), userDto.getRole());
+        auditService.logEvent(USER_CREATED, actionUser, actionUser, userDto.getUsername(), userDto.getRole().getRoleName());
+
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/delete/{username}")
     @ResponseBody
     public ResponseEntity<?> deleteUser(@PathVariable String username, Principal principal) {
+        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
         // нельзя удалить себя
         String current = principal.getName();
         if (current.equals(username)) {
@@ -83,6 +96,7 @@ public class UserController {
 
         Optional<User> deleted = userDAO.deleteUser(username);
         if (deleted.isPresent()) {
+            auditService.logEvent(USER_DELETED, actionUser, actionUser, deleted.get().getUsername(), deleted.get().getRole().getRoleName());
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
