@@ -24,8 +24,7 @@ import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static enums.AuditEventType.INCIDENT_CREATED;
-import static enums.AuditEventType.INCIDENT_DELETED;
+import static enums.AuditEventType.*;
 
 @Controller
 @RequestMapping("/incidents")
@@ -35,6 +34,8 @@ public class IncidentController {
     private static final int pageSize = 5;
     private final IncidentDAO incidentDAO;
     private final AuditService auditService;
+    private String actionUser;
+
     @Autowired
     public IncidentController(IncidentDAO incidentDAO, AuditService auditService) {
         this.incidentDAO = incidentDAO;
@@ -103,6 +104,8 @@ public class IncidentController {
     public ResponseEntity<?> addIncident(@RequestBody IncidentRequestDTO dto) {
         log.info("Adding incident: {}", dto.getTitle());
 
+        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
         if (incidentDAO.isIncidentExists(dto.getTitle())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body("Инцидент с таким названием уже существует");
@@ -117,8 +120,7 @@ public class IncidentController {
                 dto.getRecommendations()
         );
 
-        auditService.logEvent(INCIDENT_CREATED, SecurityContextHolder.getContext().getAuthentication().getName(),
-                added.get().getTitle(), SecurityContextHolder.getContext().getAuthentication().getName());
+        auditService.logEvent(INCIDENT_CREATED, actionUser, added.get().getTitle(), actionUser);
 
         return added
                 .map(incident -> ResponseEntity.status(HttpStatus.CREATED).body(toDto(incident)))
@@ -132,11 +134,12 @@ public class IncidentController {
     public ResponseEntity<?> deleteIncident(@PathVariable("id") UUID id) {
         log.info("Deleting incident: {}", id);
 
+        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
         Optional<Incident> deleted = incidentDAO.deleteIncident(id);
         if (deleted.isPresent()) {
 
-            auditService.logEvent(INCIDENT_DELETED, SecurityContextHolder.getContext().getAuthentication().getName(),
-                    deleted.get().getTitle(), SecurityContextHolder.getContext().getAuthentication().getName());
+            auditService.logEvent(INCIDENT_DELETED, actionUser, deleted.get().getTitle(), actionUser);
 
             return ResponseEntity.ok(toDto(deleted.get()));
         } else {
@@ -153,6 +156,8 @@ public class IncidentController {
                                           @RequestBody IncidentRequestDTO dto) {
         log.info("Editing incident: {}", id);
 
+        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
         Optional<Incident> existing = incidentDAO.findIncident(id);
         if (existing.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -168,6 +173,8 @@ public class IncidentController {
                 dto.getLevel() != null ? dto.getLevel() : old.getIncidentLevel(),
                 dto.getRecommendations() != null ? dto.getRecommendations() : old.getIncidentRecommendations()
         );
+
+        auditService.logEvent(INCIDENT_UPDATED, actionUser, updated.get().getTitle(), actionUser);
 
         return updated
                 .map(incident -> ResponseEntity.ok(toDto(incident)))
