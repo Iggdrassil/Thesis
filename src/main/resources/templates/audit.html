@@ -1,37 +1,49 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Аудит</title>
 
     <link rel="stylesheet" th:href="@{/css_styles/audit.css}">
     <script defer th:src="@{/js_scrypts/audit.js}"></script>
+
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 
 <body>
+<div class="container">
 
-<div class="audit-container">
+    <!-- Заголовок (как в Incidents) -->
+    <header>
+        <h1>Аудит</h1>
 
-    <h2>Аудит</h2>
+        <div class="header-buttons">
+            <button class="icon-button" id="backButton">
+                <img src="/web/static/icons/back.png" alt="Назад">
+            </button>
 
+            <button class="icon-button" id="logoutButton">
+                <img src="/web/static/icons/logout.png" alt="Выход">
+            </button>
+        </div>
+    </header>
+
+    <!-- Основная карточка -->
     <div class="audit-card">
 
-        <div class="audit-title">Записи о событиях в системе</div>
+        <h3>Записи о событиях в системе</h3>
 
-        <div id="audit-list"></div>
+        <!-- Список -->
+        <div id="audit-list" class="audit-list"></div>
 
-        <div class="pagination">
-            <button id="prev">Previous</button>
-            <span id="pages"></span>
-            <button id="next">Next</button>
-        </div>
+        <!-- Если пусто -->
+        <div id="no-audit" class="no-audit hidden">Записей не найдено</div>
+
+        <!-- Пагинация -->
+        <div class="pagination" id="pagination"></div>
     </div>
 
-    <div class="pagination"></div>
-
 </div>
-
 </body>
 </html>

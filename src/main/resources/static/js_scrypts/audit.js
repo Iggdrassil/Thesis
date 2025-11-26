@@ -5,67 +5,70 @@ async function loadAudit(page = 1) {
     const data = await resp.json();
 
     currentPage = data.page;
-
     renderList(data.records);
     renderPagination(data.page, data.totalPages);
 }
 
 function renderList(records) {
-    const container = document.getElementById("audit-list");
-    container.innerHTML = "";
+    const list = document.getElementById("audit-list");
+    const empty = document.getElementById("no-audit");
+
+    list.innerHTML = "";
 
     if (records.length === 0) {
-        container.innerHTML = "<div class='empty'>Нет записей</div>";
+        empty.classList.remove("hidden");
         return;
     }
+
+    empty.classList.add("hidden");
 
     records.forEach(r => {
         const div = document.createElement("div");
         div.className = "audit-item";
 
         div.innerHTML = `
-            <span>${r.title}</span>
-            <span>${r.description}</span>
+            <div class="audit-info">
+                <strong>${r.title}</strong>
+                <span>${r.description}</span>
+            </div>
             <span>${r.username}</span>
             <span>${r.creationDatetime}</span>
         `;
 
-        container.appendChild(div);
+        list.appendChild(div);
     });
 }
 
-function renderPagination(page, totalPages) {
-    const box = document.querySelector(".pagination");
+function renderPagination(page, total) {
+    const box = document.getElementById("pagination");
     box.innerHTML = "";
 
-    if (totalPages <= 1) return;
+    if (total <= 1) return;
 
-    // ← Previous
     if (page > 1) {
-        const btn = createPageButton("←", () => loadAudit(page - 1));
-        box.appendChild(btn);
+        box.appendChild(pageBtn("←", () => loadAudit(page - 1)));
     }
 
-    // Number buttons
-    for (let p = 1; p <= totalPages; p++) {
-        const btn = createPageButton(p, () => loadAudit(p));
+    for (let p = 1; p <= total; p++) {
+        const btn = pageBtn(p, () => loadAudit(p));
         if (p === page) btn.classList.add("active");
         box.appendChild(btn);
     }
 
-    // → Next
-    if (page < totalPages) {
-        const btn = createPageButton("→", () => loadAudit(page + 1));
-        box.appendChild(btn);
+    if (page < total) {
+        box.appendChild(pageBtn("→", () => loadAudit(page + 1)));
     }
 }
 
-function createPageButton(text, handler) {
-    const btn = document.createElement("button");
-    btn.className = "page-btn";
-    btn.textContent = text;
-    btn.onclick = handler;
-    return btn;
+function pageBtn(text, handler) {
+    const b = document.createElement("button");
+    b.className = "page-btn";
+    b.textContent = text;
+    b.onclick = handler;
+    return b;
 }
+
+document.getElementById("backButton").onclick = () => history.back();
+document.getElementById("logoutButton").onclick = () => window.location.href = "/logout";
 
 loadAudit();
