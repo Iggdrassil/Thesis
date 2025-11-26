@@ -14,13 +14,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import services.AuditService;
 
 import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static enums.AuditEventType.INCIDENT_CREATED;
+import static enums.AuditEventType.INCIDENT_DELETED;
 
 @Controller
 @RequestMapping("/incidents")
@@ -29,10 +34,11 @@ public class IncidentController {
     private static final Logger log = LoggerFactory.getLogger(IncidentController.class);
     private static final int pageSize = 5;
     private final IncidentDAO incidentDAO;
-
+    private final AuditService auditService;
     @Autowired
-    public IncidentController(IncidentDAO incidentDAO) {
+    public IncidentController(IncidentDAO incidentDAO, AuditService auditService) {
         this.incidentDAO = incidentDAO;
+        this.auditService = auditService;
     }
 
     // Отображение страницы инцидентов
@@ -111,6 +117,9 @@ public class IncidentController {
                 dto.getRecommendations()
         );
 
+        auditService.logEvent(INCIDENT_CREATED, SecurityContextHolder.getContext().getAuthentication().getName(),
+                added.get().getTitle(), SecurityContextHolder.getContext().getAuthentication().getName());
+
         return added
                 .map(incident -> ResponseEntity.status(HttpStatus.CREATED).body(toDto(incident)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
@@ -125,6 +134,10 @@ public class IncidentController {
 
         Optional<Incident> deleted = incidentDAO.deleteIncident(id);
         if (deleted.isPresent()) {
+
+            auditService.logEvent(INCIDENT_DELETED, SecurityContextHolder.getContext().getAuthentication().getName(),
+                    deleted.get().getTitle(), SecurityContextHolder.getContext().getAuthentication().getName());
+
             return ResponseEntity.ok(toDto(deleted.get()));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
