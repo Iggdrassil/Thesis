@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Аудит</title>
+
+    <link rel="stylesheet" th:href="@{/css_styles/audit.css}">
+    <script defer th:src="@{/js_scrypts/audit.js}"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+
+<body>
+
+<div class="audit-container">
+
+    <h2>Аудит</h2>
+
+    <div class="audit-card">
+
+        <div class="audit-title">Записи о событиях в системе</div>
+
+        <div id="audit-list"></div>
+
+        <div class="pagination">
+            <button id="prev">Previous</button>
+            <span id="pages"></span>
+            <button id="next">Next</button>
+        </div>
+    </div>
+
+    <div class="pagination"></div>
+
+</div>
+
+</body>
+</html>
