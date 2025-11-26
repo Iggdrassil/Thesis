@@ -1,4 +1,5 @@
 package security;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -6,9 +7,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import other.LoginSuccessHandler;
 
 @Configuration
 public class SecurityConfig {
+
+    @Autowired
+    private LoginSuccessHandler loginSuccessHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -25,8 +31,9 @@ public class SecurityConfig {
 
                 // кастомная форма логина
                 .formLogin(form -> form
-                        .loginPage("/login")           // GET /login — твой шаблон
+                        .loginPage("/login")           // GET /login
                         .loginProcessingUrl("/userLogin") // POST сюда будет отправляться форма
+                        .successHandler(loginSuccessHandler)
                         .defaultSuccessUrl("/main", true) // куда редирект после успешной аутентификации
                         .failureUrl("/login?error=true")
                         .permitAll()

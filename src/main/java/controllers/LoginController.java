@@ -29,7 +29,7 @@ public class LoginController {
         return "login"; // имя шаблона login.html
     }
 
-    @PostMapping("/userLogin")
+   /* @PostMapping("/userLogin")
     public String loginUser(@RequestParam String username,
                             @RequestParam String password,
                             HttpSession session,
@@ -51,7 +51,7 @@ public class LoginController {
 
         // Перенаправляем на главную страницу
         return "redirect:/main";
-    }
+    }*/
 
 
     @GetMapping("/logout")
