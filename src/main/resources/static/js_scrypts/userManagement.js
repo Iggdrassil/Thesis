@@ -22,9 +22,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // Кнопка выхода
-    logoutButton.addEventListener("click", () => {
-        fetch("/logout", { method: "POST" })
-            .then(() => window.location.href = "/login");
+    logoutButton.addEventListener('click', () => {
+        if (confirm("Вы действительно хотите завершить сеанс?")) {
+            fetch('/logout', { method: 'POST' })
+                .then(() => window.location.href = '/login');
+        }
     });
 
 // Кнопка назад — возвращаемся на предыдущее меню

@@ -23,7 +23,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        System.out.println("=== LOGIN SUCCESS HANDLER CALLED ===");
         String username = authentication.getName();
 
         auditService.logEvent(

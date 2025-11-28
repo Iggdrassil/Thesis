@@ -3,6 +3,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,41 +11,56 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import other.LoginSuccessHandler;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
+    private final LoginSuccessHandler loginSuccessHandler;
+
     @Autowired
-    private LoginSuccessHandler loginSuccessHandler;
+    public SecurityConfig(LoginSuccessHandler loginSuccessHandler) {
+        this.loginSuccessHandler = loginSuccessHandler;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-                // что разрешаем всем (статические ресурсы, страницы логина)
+                // --- ОГРАНИЧЕНИЯ ДОСТУПА ---
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css_styles/**", "/js_scrypts/**", "/web/static/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/login", "/error").permitAll()
-                        // API для пользователей — доступ только авторизованным
-                        .requestMatchers("/users/api/**").hasRole("ADMIN") // пример: доступ только ADMIN
-                        // страницы настроек — только для аутентифицированных
-                        .requestMatchers("/settings", "/users", "/main", "/incidents", "/audit", "/statistics").authenticated()
+                        // Статика (обязательно разрешать!)
+                        .requestMatchers(
+                                "/css_styles/**",
+                                "/js_scrypts/**",
+                                "/web/static/**",
+                                "/favicon.ico"
+                        ).permitAll()
+                        .requestMatchers("/login", "/error").permitAll() // Страница логина и ошибка — доступны всем
+                        .requestMatchers("/users/api/**").hasRole("ADMIN") // только админам
+                        // Основные страницы — только авторизованным
+                        .requestMatchers("/settings", "/users", "/main",
+                                "/incidents", "/audit", "/statistics")
+                        .authenticated()
                         .anyRequest().authenticated()
                 )
 
-                // кастомная форма логина
+                // --- НАСТРОЙКИ ФОРМЫ ЛОГИНА ---
                 .formLogin(form -> form
-                        .loginPage("/login")           // GET /login
-                        .loginProcessingUrl("/userLogin") // POST сюда будет отправляться форма
+                        .loginPage("/login")                // GET — форма логина
+                        .loginProcessingUrl("/userLogin")   // POST — обработка логина
                         .successHandler(loginSuccessHandler)
-                        .defaultSuccessUrl("/main", true) // куда редирект после успешной аутентификации
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
 
-                // logout
+
+                // --- ВЫХОД ИЗ СИСТЕМЫ ---
                 .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
+                        .logoutRequestMatcher(
+                                new AntPathRequestMatcher("/logout", "POST"))
                         .logoutSuccessUrl("/login?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
+                        .permitAll()
                 )
 
         // CSRF включён по умолчанию
@@ -58,3 +74,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+

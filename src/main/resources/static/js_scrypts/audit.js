@@ -68,7 +68,16 @@ function pageBtn(text, handler) {
     return b;
 }
 
-document.getElementById("backButton").onclick = () => history.back();
-document.getElementById("logoutButton").onclick = () => window.location.href = "/logout";
+// Кнопка назад — возвращаемся на предыдущее меню
+document.getElementById("backButton").addEventListener("click", () => {
+    window.location.href = "/main";
+});
+
+document.getElementById("logoutButton").addEventListener('click', () => {
+    if (confirm("Вы действительно хотите завершить сеанс?")) {
+        fetch('/logout', { method: 'POST' })
+            .then(() => window.location.href = '/login');
+    }
+});
 
 loadAudit();
