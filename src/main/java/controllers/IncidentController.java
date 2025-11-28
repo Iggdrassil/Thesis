@@ -107,7 +107,8 @@ public class IncidentController {
         actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (incidentDAO.isIncidentExists(dto.getTitle())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
+            auditService.logEvent(INCIDENT_CREATE_ERROR, actionUser, dto.getTitle(), "Инцидент с таким именем уже существует");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Инцидент с таким названием уже существует");
         }
 
@@ -120,11 +121,12 @@ public class IncidentController {
                 dto.getRecommendations()
         );
 
-        auditService.logEvent(INCIDENT_CREATED, actionUser, added.get().getTitle(), actionUser);
-
-        return added
-                .map(incident -> ResponseEntity.status(HttpStatus.CREATED).body(toDto(incident)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+        if (added.isPresent()) {
+            auditService.logEvent(INCIDENT_CREATED, actionUser, added.get().getTitle(), actionUser);
+                return ResponseEntity.status(HttpStatus.OK).body(toDto(added.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**
@@ -174,11 +176,15 @@ public class IncidentController {
                 dto.getRecommendations() != null ? dto.getRecommendations() : old.getIncidentRecommendations()
         );
 
-        auditService.logEvent(INCIDENT_UPDATED, actionUser, updated.get().getTitle(), actionUser);
+        if (updated.isPresent()) {
 
-        return updated
-                .map(incident -> ResponseEntity.ok(toDto(incident)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+            auditService.logEvent(INCIDENT_UPDATED, actionUser, updated.get().getTitle(), actionUser);
+
+            return ResponseEntity.ok(toDto(updated.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Инцидент не найден");
+        }
     }
 
     @GetMapping("/categories")
@@ -221,8 +227,6 @@ public class IncidentController {
 
         return ResponseEntity.ok(toDto(incident.get()));
     }
-
-
 
     public record EnumLocalizedDto(String value, String label) {}
 
