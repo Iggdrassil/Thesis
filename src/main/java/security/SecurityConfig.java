@@ -25,7 +25,7 @@ public class SecurityConfig {
                         // API для пользователей — доступ только авторизованным
                         .requestMatchers("/users/api/**").hasRole("ADMIN") // пример: доступ только ADMIN
                         // страницы настроек — только для аутентифицированных
-                        .requestMatchers("/settings", "/users", "/main", "/incidents", "/audit", "/stats").authenticated()
+                        .requestMatchers("/settings", "/users", "/main", "/incidents", "/audit", "/statistics").authenticated()
                         .anyRequest().authenticated()
                 )
 
@@ -47,7 +47,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                 )
 
-        // CSRF включён по умолчанию — оставляем
+        // CSRF включён по умолчанию
         ;
 
         return http.build();
