@@ -1,4 +1,6 @@
 const role = document.body.dataset.role; // Thymeleaf вставит значение из сессии
+const header = document.querySelector('meta[name="_csrf_header"]').content;
+const token = document.querySelector('meta[name="_csrf"]').content;
 
 if (role === 'ROLE_USER' || role === 'ROLE_AUDITOR') {
     document.getElementById('settings-btn').style.display = 'none';
@@ -29,7 +31,13 @@ function goTo(section) {
 
 document.getElementById('logout-btn').addEventListener('click', () => {
     if (confirm("Вы действительно хотите завершить сеанс?")) {
-        fetch('/logout', { method: 'POST' })
-            .then(() => window.location.href = '/login');
+
+        fetch('/logout', {
+            method: 'POST',
+            headers: {
+                [header]: token
+            }
+        })
+            .then(() => window.location.href = '/login?logout=true');
     }
 });

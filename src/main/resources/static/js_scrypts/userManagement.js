@@ -3,6 +3,8 @@ const closeErrorModal = document.getElementById("closeErrorModal");
 const errorMessage = document.getElementById("errorMessage");
 const userList = document.getElementById("userList");
 const pagination = document.getElementById("pagination");
+const header = document.querySelector('meta[name="_csrf_header"]').content;
+const token = document.querySelector('meta[name="_csrf"]').content;
 
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -24,8 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Кнопка выхода
     logoutButton.addEventListener('click', () => {
         if (confirm("Вы действительно хотите завершить сеанс?")) {
-            fetch('/logout', { method: 'POST' })
-                .then(() => window.location.href = '/login');
+
+            fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    [header]: token
+                }
+            })
+                .then(() => window.location.href = '/login?logout=true');
         }
     });
 

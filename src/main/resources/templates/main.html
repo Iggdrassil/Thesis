@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Главное меню</title>
     <link rel="stylesheet" th:href="@{/css_styles/main.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body th:attr="data-role=${role}">
 <div class="main-container">

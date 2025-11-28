@@ -220,8 +220,14 @@ async function submitCreateIncident(){
 // Кнопка выхода
 logoutButton.addEventListener('click', () => {
     if (confirm("Вы действительно хотите завершить сеанс?")) {
-        fetch('/logout', { method: 'POST' })
-            .then(() => window.location.href = '/login');
+
+        fetch('/logout', {
+            method: 'POST',
+            headers: {
+                [header]: token
+            }
+        })
+            .then(() => window.location.href = '/login?logout=true');
     }
 });
 
