@@ -51,7 +51,7 @@ async function loadStats() {
     new Chart(document.getElementById("perDayBar"), {
         type: 'bar',
         data: {
-            labels: daily.map(e => e.date),
+            labels: daily.map(e => e.day),
             datasets: [{
                 label: "Инциденты",
                 data: daily.map(e => e.count)
