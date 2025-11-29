@@ -10,7 +10,7 @@ body {
     min-height: 100vh;
     flex-direction: column;
     position: relative;
-    padding: 0 0 100px;
+    /*padding: 0 0 100px;*/
 }
 
 /* Основной контейнер */
@@ -29,8 +29,13 @@ body {
 header {
     display: flex;
     justify-content: space-between;
-    flex-shrink: 0;
     align-items: center;
+}
+
+header h1 {
+    font-size: 26px;  /* было ~32–36px */
+    margin: 0;
+    padding: 0;
 }
 
 .header-buttons {
@@ -55,22 +60,24 @@ header {
     height: 28px;
 }
 
-/* Карточка */
 .statistics-card {
     background: #fff;
     padding: 30px;
     border-radius: 14px;
     box-shadow: 0 3px 12px rgba(0,0,0,0.12);
-
     margin-top: 20px;
     border: 1px solid rgba(0, 0, 0, 0.1);
+
     display: flex;
     flex-direction: column;
     flex: 1;
     width: 95%;
     min-height: 750px;
+
+    /* ВАЖНО: убираем растягивание вниз, сохраняя структуру */
+    justify-content: flex-start;
+
     overflow: visible;
-    justify-content: space-between;
     transition: height 0.3s ease;
 }
 
@@ -91,10 +98,9 @@ header {
     box-shadow: 0 2px 6px rgba(0,0,0,0.07);
 }
 
-/* Главное — фиксированные размеры canvas! */
 .chart-box canvas {
-    width: 320px !important;
-    height: 320px !important;
+    width: 260px !important;
+    height: 260px !important;
     margin: 0 auto;
     display: block;
 }
@@ -104,9 +110,10 @@ header {
     margin-top: 40px;
 }
 
+/* Было 280px → стало 220px */
 .bar-box canvas {
     width: 100% !important;
-    height: 280px !important;
+    height: 220px !important;
 }
 
 /* Заголовки */
