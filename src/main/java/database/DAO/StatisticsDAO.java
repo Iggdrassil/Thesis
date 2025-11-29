@@ -2,6 +2,8 @@ package database.DAO;
 
 import database.DTO.StatisticsDto;
 import database.Database;
+import enums.IncidentCategory;
+import enums.IncidentLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -42,8 +44,12 @@ public class StatisticsDAO {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
+                String levelStr = rs.getString("incident_level");
+                IncidentLevel level = IncidentLevel.valueOf(levelStr);
+
                 list.add(new StatisticsDto.ImportanceDto(
-                        rs.getString("incident_level"),
+                        levelStr,
+                        level.getLabel(),
                         rs.getLong("cnt")
                 ));
             }
@@ -72,8 +78,13 @@ public class StatisticsDAO {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
+                String catStr = rs.getString("incident_category");
+                IncidentCategory category = IncidentCategory.valueOf(catStr);
+
+
                 list.add(new StatisticsDto.CategoryDto(
-                        rs.getString("incident_category"),
+                        catStr,
+                        category.getLabel(),
                         rs.getLong("cnt")
                 ));
             }

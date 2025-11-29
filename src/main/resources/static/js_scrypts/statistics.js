@@ -17,7 +17,6 @@ async function loadStats() {
         MEDIUM: "#FFD93D",
         LOW: "#4CAF50"
     };
-    console.log("DAILY DATA:", daily);
 
     const categoryColors = {
         DDOS: "#ECCE08",
@@ -30,12 +29,10 @@ async function loadStats() {
         OTHER: "#4b4949"
     };
 
-
-
     new Chart(document.getElementById("categoriesPie"), {
         type: 'pie',
         data: {
-            labels: categories.map(e => e.category),
+            labels: categories.map(e => e.localizedCategory),
             datasets: [{ data: categories.map(e => e.count),
                 backgroundColor: categories.map(e => categoryColors[e.category])}]
         }
@@ -44,7 +41,7 @@ async function loadStats() {
     new Chart(document.getElementById("levelsPie"), {
         type: 'pie',
         data: {
-            labels: levels.map(e => e.level),
+            labels: levels.map(e => e.localizedLevel),
             datasets: [{ data: levels.map(e => e.count),
                 backgroundColor: levels.map(e => levelColors[e.level])
             }]
