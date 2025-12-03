@@ -26,8 +26,6 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
                                 HttpServletResponse response,
                                 Authentication authentication) throws IOException {
 
-        System.out.println("LOGOUT DETECTED");
-
         if (authentication != null) {
             String username = authentication.getName();
 
