@@ -17,11 +17,17 @@
         <label for="password">Пароль</label>
         <input type="password" id="password" name="password" placeholder="Введите пароль" required>
 
-        <button type="submit">Войти</button>
+        <button type="submit" id="loginButton">Войти</button>
 
         <p th:if="${param.error}" class="error-message">Неверный логин или пароль</p>
         <p th:if="${param.logout}" class="info-message">Вы вышли из системы</p>
     </form>
+    <p th:if="${param.blocked}"
+       id="blockedMessage"
+       class="error-message"
+       th:text="'Вход заблокирован на ' + ${param.blocked} + ' секунд'">
+    </p>
+
 </div>
 
 </body>

@@ -39,7 +39,10 @@ public enum AuditEventType {
     INCIDENT_DELETED(
             "Удаление инцидента",
             "Инцидент \"%s\" удален пользователем \"%s\""
-    );
+    ),
+    USER_LOGIN_BLOCK("Блокировка входа", "Пользователь %s временно заблокирован из-за неверных попыток входа"),
+    USER_LOGIN_UNBLOCK("Снятие блокировки", "С пользователя %s снята временная блокировка");
+
 
     private final String title;
     private final String template;
