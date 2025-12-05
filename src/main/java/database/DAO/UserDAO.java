@@ -81,29 +81,36 @@ public class UserDAO {
         }
     }
 
-    // Редактирование пользователя (пароль и роль)
-    public Optional<User> editUser(String username, String newPassword, UserRole newRole) {
-        log.info("Editing user {}", username);
-        Optional<User> userOpt = getUserByUsername(username);
-        String hashed = passwordEncoder.encode(newPassword);
+    public Optional<User> editUser(String oldUsername, String newPassword, UserRole newRole, String newUsername) {
+
+        Optional<User> userOpt = getUserByUsername(oldUsername);
         if (userOpt.isEmpty()) return Optional.empty();
 
-        String sql = "UPDATE users SET password = ?, role = ? WHERE username = ?";
+        String hashed = newPassword == null || newPassword.isBlank()
+                ? userOpt.get().getPassword()
+                : passwordEncoder.encode(newPassword);
+
+        String sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE username = ?";
+
         try (Connection conn = database.createConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, hashed);
-            stmt.setString(2, newRole.name());
-            stmt.setString(3, username);
+            stmt.setString(1, newUsername);
+            stmt.setString(2, hashed);
+            stmt.setString(3, newRole.name());
+            stmt.setString(4, oldUsername);
 
-            log.info("Executing SQL: {}", stmt);
             stmt.executeUpdate();
 
-            log.info("User {} with name was edited successfully", username);
-            return Optional.of(new User(userOpt.get().getId(), username, newPassword, newRole));
+            return Optional.of(new User(
+                    userOpt.get().getId(),
+                    newUsername,
+                    hashed,
+                    newRole
+            ));
 
         } catch (SQLException e) {
-            log.error("Error editing user {}: {}", username, e.getMessage());
+            log.error("Error editing user {}: {}", oldUsername, e.getMessage());
             return Optional.empty();
         }
     }

@@ -106,9 +106,103 @@ document.addEventListener("DOMContentLoaded", () => {
     render(currentPage);
 });
 
-// Примеры заглушек функций (позже можно заменить модалками или запросами)
-function editUser(username) {
-    alert(`Редактирование пользователя: ${username}`);
+async function editUser(username) {
+    const editModal = document.getElementById("editUserModal");
+    const editUsername = document.getElementById("editUsername");
+    const editPassword = document.getElementById("editPassword");
+    const editForm = document.getElementById("editUserForm");
+    const applyBtn = document.getElementById("applyEditUser");
+
+    // загрузить данные одного пользователя
+    let user;
+    try {
+        const resp = await fetch(`/users/get/${encodeURIComponent(username)}`);
+
+        if (!resp.ok) {
+            if (resp.status === 404) {
+                showErrorModal("Пользователь не найден");
+            } else {
+                showErrorModal("Ошибка при загрузке данных пользователя");
+            }
+            return;
+        }
+
+        user = await resp.json();
+    } catch (err) {
+        showErrorModal("Ошибка соединения с сервером");
+        return;
+    }
+
+    // Заполнить форму
+    editUsername.value = user.username;
+    editPassword.value = "";
+
+    // маппинг локализованных ролей в значения радио-кнопок
+    const roleMap = {
+        "Администратор ИБ": "ADMIN",
+        "Аудитор": "AUDITOR",
+        "Пользователь": "USER"
+    };
+
+    const mappedRole = roleMap[user.role];
+    console.log("role from backend:", user.role);
+
+    document.querySelector(`input[name="editRole"][value="${mappedRole}"]`).checked = true;
+    //document.querySelector(`input[name="editRole"][value="${user.role}"]`).checked = true;
+
+    // Открыть модалку
+    editModal.style.display = "flex";
+
+    // Удаляем старый обработчик
+    const newApplyBtn = applyBtn.cloneNode(true);
+    applyBtn.parentNode.replaceChild(newApplyBtn, applyBtn);
+
+    newApplyBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const newName = editUsername.value.trim();
+        const newPass = editPassword.value.trim();
+        const newRole = document.querySelector('input[name="editRole"]:checked').value;
+
+        const body = {
+            oldUsername: username,
+            newUsername: newName,
+            newPassword: newPass || null,
+            newRole: newRole
+        };
+
+        try {
+            const response = await fetch("/users/edit", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    [header]: token
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (response.ok) {
+                editModal.style.display = "none";
+                await render(1);
+            }
+            else if (response.status === 409) {
+                showErrorModal("Имя пользователя уже существует");
+            }
+            else {
+                showErrorModal("Ошибка при редактировании пользователя");
+            }
+        } catch (err) {
+            showErrorModal("Ошибка соединения с сервером");
+        }
+    });
+
+    // Закрытие модалки
+    document.getElementById("cancelEditUser").onclick = () => {
+        editModal.style.display = "none";
+    };
+    document.getElementById("closeEditModal").onclick = () => {
+        editModal.style.display = "none";
+    };
 }
 
 function deleteUser(username) {
@@ -237,5 +331,11 @@ async function render(page) {
         });
         pagination.appendChild(btn);
     }
+}
+
+async function loadUser(username) {
+    const resp = await fetch(`/users/get/${encodeURIComponent(username)}`);
+    if (!resp.ok) return null;
+    return await resp.json();
 }
 

@@ -1,6 +1,7 @@
 package controllers;
 
 import database.DAO.UserDAO;
+import database.DTO.EditUserDTO;
 import database.DTO.UserDTO;
 import database.models.User;
 import org.springframework.http.HttpStatus;
@@ -103,5 +104,60 @@ public class UserController {
                     .body(Map.of("message", "Пользователь не найден"));
         }
     }
+
+    @PutMapping("/edit")
+    @ResponseBody
+    public ResponseEntity<?> editUser(@RequestBody EditUserDTO dto, Principal principal) {
+        String actionUser = principal.getName();
+
+        // Нельзя менять себя на другое имя → предотвращаем вынос текущего логина
+        if (dto.getOldUsername().equals(actionUser) && !dto.getOldUsername().equals(dto.getNewUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message","Нельзя менять свое имя пользователя"));
+        }
+
+        // Проверка существования нового имени
+        if (!dto.getOldUsername().equals(dto.getNewUsername())
+                && userDAO.isUserExists(dto.getNewUsername())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        Optional<User> edited = userDAO.editUser(
+                dto.getOldUsername(),
+                dto.getNewPassword(),
+                dto.getNewRole(),
+                dto.getNewUsername()
+        );
+
+        if (edited.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        auditService.logEvent(
+                USER_EDITED,
+                actionUser,
+                dto.getOldUsername(),
+                actionUser
+        );
+
+        return ResponseEntity.ok().build();
+    }
+
+    // REST — получить одного пользователя по username
+    @GetMapping("/get/{username}")
+    @ResponseBody
+    public ResponseEntity<?> getUser(@PathVariable String username) {
+
+        Optional<User> userOpt = userDAO.getUserByUsername(username);
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Пользователь не найден"));
+        }
+
+        return ResponseEntity.ok(userOpt.get());
+    }
+
+
 
 }
