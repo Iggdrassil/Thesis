@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+
 @Service
 @Component
 public class IncidentNotificationService {
@@ -32,7 +34,7 @@ public class IncidentNotificationService {
             if (!s.getAllowedCategories().contains(incident.getIncidentCategory())) return;
         }
 
-        String subject = "Новый инцидент: " + incident.getTitle();
+        String subject = String.format("Новый инцидент: %s, уровень важности: %s", incident.getTitle(), incident.getIncidentLevel().getLabel());
 
         String body = """
                 Создан новый инцидент:
