@@ -71,6 +71,30 @@ public class DatabaseInitializer {
             stmt.execute(sqlAudit);
             log.info("Table \"audit_log\" created or already exists");
 
+            //Создание таблицы для хранения настроек подключения к почтовому серверу
+            log.info("Creating \"email_settings\" table if not exists");
+            String sqlEmailSettings = """
+                    CREATE TABLE IF NOT EXISTS email_settings (
+                        id INTEGER PRIMARY KEY CHECK (id = 1),
+                       \s
+                        enabled BOOLEAN NOT NULL DEFAULT 0,
+                    
+                        smtp_host TEXT,
+                        smtp_port INTEGER,
+                        smtp_username TEXT,
+                        smtp_password TEXT,
+                    
+                        recipient_email TEXT,
+                    
+                        notify_all BOOLEAN NOT NULL DEFAULT 1,
+                        allowed_levels TEXT,     -- CSV: "HIGH,MEDIUM"
+                        allowed_categories TEXT  -- CSV: "DDOS,MALWARE"
+                    );
+                    """;
+
+            stmt.execute(sqlEmailSettings);
+            log.info("Table \"audit_log\" created or already exists");
+
 
             creatingDefaultAdmin();
 

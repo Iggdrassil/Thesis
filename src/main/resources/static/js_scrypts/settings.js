@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Кнопка назад — возвращаемся на предыдущее меню
     backButton.addEventListener("click", () => {
-        window.history.back();
+        window.location.href = "/main";
     });
 
     // Кнопка выхода

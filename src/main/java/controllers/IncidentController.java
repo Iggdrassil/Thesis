@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import services.AuditService;
+import services.IncidentNotificationService;
 
 import java.security.Principal;
 import java.util.*;
@@ -34,12 +35,14 @@ public class IncidentController {
     private static final int pageSize = 5;
     private final IncidentDAO incidentDAO;
     private final AuditService auditService;
+    private final IncidentNotificationService incidentNotificationService;
     private String actionUser;
 
     @Autowired
-    public IncidentController(IncidentDAO incidentDAO, AuditService auditService) {
+    public IncidentController(IncidentDAO incidentDAO, AuditService auditService, IncidentNotificationService incidentNotificationService) {
         this.incidentDAO = incidentDAO;
         this.auditService = auditService;
+        this.incidentNotificationService = incidentNotificationService;
     }
 
     // Отображение страницы инцидентов
@@ -122,6 +125,7 @@ public class IncidentController {
         );
 
         if (added.isPresent()) {
+            incidentNotificationService.notifyIfNeeded(added.get());
             auditService.logEvent(INCIDENT_CREATED, actionUser, added.get().getTitle(), actionUser);
                 return ResponseEntity.status(HttpStatus.OK).body(toDto(added.get()));
         } else {

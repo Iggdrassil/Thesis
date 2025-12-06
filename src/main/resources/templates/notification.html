@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Оповещение</title>
+    <link rel="stylesheet" th:href="@{/css_styles/notification.css}">
+    <script defer th:src="@{/js_scrypts/notification.js}"></script>
+
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>Оповещение</h1>
+        <div class="header-buttons">
+            <button class="icon-button" id="backButton">
+                <img src="/web/static/icons/back.png" alt="Назад">
+            </button>
+            <button class="icon-button" id="homeBtn">
+                <img src="/web/static/icons/home.png" alt="Домой">
+            </button>
+            <button class="icon-button" id="logoutButton">
+                <img src="/web/static/icons/logout.png" alt="Выход">
+            </button>
+        </div>
+    </header>
+
+    <!-- SETTINGS CARD -->
+    <div class="settings-card">
+
+        <h2>Текущие настройки оповещения</h2>
+        <hr>
+
+        <!-- Toggle -->
+        <div class="toggle-row">
+            <span>Включить оповещения по электронной почте</span>
+            <label class="switch">
+                <input type="checkbox" id="notifyToggle">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+        <!-- Disabled Message -->
+        <p id="disabledMessage" class="disabled-message">Оповещение по электронной почте отключено</p>
+
+        <!-- Settings Form -->
+        <div id="settingsBlock">
+
+            <div class="row">
+                <button id="selectLevelsBtn" class="select-btn">Выбрать уровни важности</button>
+                <button id="selectCategoriesBtn" class="select-btn">Выбрать категории</button>
+            </div>
+
+            <div class="row">
+                <div class="field-group">
+                    <label for="smtpHost">Адрес почтового сервера</label>
+                    <input type="text" id="smtpHost" placeholder="Введите адрес почтового сервера">
+                </div>
+                <div class="field-group">
+                    <label for="smtpPort">Порт почтового сервера</label>
+                    <input type="number" id="smtpPort" placeholder="Введите порт почтового сервера">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field-group">
+                    <label for="smtpUser">Пользователь почтового сервера</label>
+                    <input type="text" id="smtpUser" placeholder="Введите пользователя почтового сервера">
+                </div>
+                <div class="field-group">
+                    <label for="smtpPassword">Пароль почтового сервера</label>
+                    <input type="password" id="smtpPassword" placeholder="Введите пароль от почтового сервера">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field-group">
+                    <label for="senderEmail">Почта отправителя</label>
+                    <input type="email" id="senderEmail" placeholder="Почта отправителя">
+                </div>
+                <div class="field-group">
+                    <label for="recipientEmail">Почта получателя</label>
+                    <input type="email" id="recipientEmail" placeholder="Почта получателя">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="icon-row">
+        <!-- Test email -->
+        <img src="/web/static/icons/sendTestMail.png" id="sendTestBtn" class="icon-button" title="Отправить тестовое письмо">
+        <!-- Save settings -->
+        <img src="/web/static/icons/saveSettings.png" id="saveBtn" class="icon-button" title="Сохранить настройки">
+    </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal" id="levelsModal">
+    <div class="modal-content">
+        <h3>Выберите уровни важности о которых оповещать</h3>
+        <div id="levelsList"></div>
+        <div class="modal-btns">
+            <button id="cancelLevelsBtn">Отмена</button>
+            <button id="saveLevelsBtn" class="primary">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="categoriesModal">
+    <div class="modal-content">
+        <h3>Выберите категории инцидентов о которых оповещать</h3>
+        <div id="categoriesList"></div>
+        <div class="modal-btns">
+            <button id="cancelCategoriesBtn">Отмена</button>
+            <button id="saveCategoriesBtn" class="primary">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="errorModal">
+    <div class="modal-content error-window">
+        <p id="errorText"></p>
+        <button id="closeErrorBtn" class="primary">Закрыть</button>
+    </div>
+</div>
+
+</body>
+</html>
