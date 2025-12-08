@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import services.AuditService;
 import services.IncidentNotificationService;
 
-import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 

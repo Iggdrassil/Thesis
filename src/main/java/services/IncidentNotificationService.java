@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
+import static enums.AuditEventType.SEND_EMAIL_FAIL;
+import static enums.AuditEventType.SEND_EMAIL_SUCCESS;
 
 @Service
 @Component
@@ -18,20 +19,22 @@ public class IncidentNotificationService {
 
     private final EmailSettingsDAO settingsDAO;
     private final EmailService emailService;
+    private final AuditService auditService;
 
-    public IncidentNotificationService(EmailSettingsDAO settingsDAO, EmailService emailService) {
+    public IncidentNotificationService(EmailSettingsDAO settingsDAO, EmailService emailService, AuditService auditService) {
         this.settingsDAO = settingsDAO;
         this.emailService = emailService;
+        this.auditService = auditService;
     }
 
     public void notifyIfNeeded(Incident incident) {
-        EmailSettings s = settingsDAO.load();
+        EmailSettings emailSettings = settingsDAO.load();
 
-        if (!s.isEnabled()) return;
+        if (!emailSettings.isEnabled()) return;
 
-        if (!s.isNotifyAll()) {
-            if (!s.getAllowedLevels().contains(incident.getIncidentLevel())) return;
-            if (!s.getAllowedCategories().contains(incident.getIncidentCategory())) return;
+        if (!emailSettings.isNotifyAll()) {
+            if (!emailSettings.getAllowedLevels().contains(incident.getIncidentLevel())) return;
+            if (!emailSettings.getAllowedCategories().contains(incident.getIncidentCategory())) return;
         }
 
         String subject = String.format("Новый инцидент: %s, уровень важности: %s", incident.getTitle(), incident.getIncidentLevel().getLabel());
@@ -66,8 +69,10 @@ public class IncidentNotificationService {
         );
 
         try {
-            emailService.sendEmail(s, subject, body);
+            emailService.sendEmail(emailSettings, subject, body);
+            auditService.logEventSimple(SEND_EMAIL_SUCCESS, emailSettings.getRecipientEmail());
         } catch (Exception e) {
+            auditService.logEventSimple(SEND_EMAIL_FAIL, emailSettings.getRecipientEmail());
             e.printStackTrace();
         }
     }

@@ -204,7 +204,7 @@ header {
 }
 
 input:checked + .slider {
-    background-color: #4caf50; /* зелёный при включении */
+    background-color: #0804d3; /* меняет цвет при включении */
 }
 
 input:checked + .slider:before {

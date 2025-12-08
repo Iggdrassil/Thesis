@@ -3,6 +3,7 @@ package services;
 import database.DAO.AuditDAO;
 import database.DTO.AuditRecordDto;
 import enums.AuditEventType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,19 @@ public class AuditService {
         dto.title = type.getTitle();
         dto.description = type.format(args);
         dto.username = username;
+        dto.creationDatetime = LocalDateTime.now().toString();
+
+        auditDAO.addRecord(dto);
+    }
+
+    public void logEventSimple(AuditEventType type, Object... args) {
+
+        AuditRecordDto dto = new AuditRecordDto();
+        dto.id = UUID.randomUUID().toString();
+        dto.eventType = type.name();
+        dto.title = type.getTitle();
+        dto.description = type.format(args);
+        dto.username = SecurityContextHolder.getContext().getAuthentication().getName();
         dto.creationDatetime = LocalDateTime.now().toString();
 
         auditDAO.addRecord(dto);

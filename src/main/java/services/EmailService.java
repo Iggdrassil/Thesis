@@ -37,8 +37,6 @@ public class EmailService {
             }
         });
 
-        session.setDebug(true); // включить вывод логов для отладки
-
         MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(s.getSmtpUsername()));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(s.getRecipientEmail()));

@@ -4,8 +4,10 @@ import database.Database;
 import database.models.EmailSettings;
 import enums.IncidentCategory;
 import enums.IncidentLevel;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import services.AuditService;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,14 +17,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static enums.AuditEventType.*;
+
 @Component
 @Repository
 public class EmailSettingsDAO {
 
     private final Database database;
+    private final AuditService auditService;
 
-    public EmailSettingsDAO(Database database) {
+    public EmailSettingsDAO(Database database, AuditService auditService) {
         this.database = database;
+        this.auditService = auditService;
     }
 
     public EmailSettings load() {
@@ -55,7 +61,7 @@ public class EmailSettingsDAO {
         }
     }
 
-    public void save(EmailSettings s) {
+    public void save(EmailSettings emailSettings) {
         String sql = """
                 INSERT INTO email_settings (id, enabled, smtp_host, smtp_port, smtp_username, smtp_password, 
                                             recipient_email, notify_all, allowed_levels, allowed_categories)
@@ -75,17 +81,20 @@ public class EmailSettingsDAO {
         try (Connection conn = database.createConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setBoolean(1, s.isEnabled());
-            ps.setString(2, s.getSmtpHost());
-            ps.setInt(3, s.getSmtpPort());
-            ps.setString(4, s.getSmtpUsername());
-            ps.setString(5, s.getSmtpPassword());
-            ps.setString(6, s.getRecipientEmail());
-            ps.setBoolean(7, s.isNotifyAll());
-            ps.setString(8, joinLevels(s.getAllowedLevels()));
-            ps.setString(9, joinCategories(s.getAllowedCategories()));
+            ps.setBoolean(1, emailSettings.isEnabled());
+            ps.setString(2, emailSettings.getSmtpHost());
+            ps.setInt(3, emailSettings.getSmtpPort());
+            ps.setString(4, emailSettings.getSmtpUsername());
+            ps.setString(5, emailSettings.getSmtpPassword());
+            ps.setString(6, emailSettings.getRecipientEmail());
+            ps.setBoolean(7, emailSettings.isNotifyAll());
+            ps.setString(8, joinLevels(emailSettings.getAllowedLevels()));
+            ps.setString(9, joinCategories(emailSettings.getAllowedCategories()));
 
             ps.executeUpdate();
+
+            auditService.logEventSimple(emailSettings.isEnabled() ? EMAIL_NOTIFICATION_ENABLE : EMAIL_NOTIFICATION_DISABLE,
+                    SecurityContextHolder.getContext().getAuthentication().getName());
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save email settings", e);
         }
