@@ -5,6 +5,7 @@ import database.models.EmailSettings;
 import database.models.Incident;
 import enums.IncidentRecommendation;
 import jakarta.mail.MessagingException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,7 @@ public class IncidentNotificationService {
         this.auditService = auditService;
     }
 
-    public void notifyIfNeeded(Incident incident) {
+    public void notifyIfNeeded(Incident incident, String username) {
         EmailSettings emailSettings = settingsDAO.load();
 
         if (!emailSettings.isEnabled()) return;
@@ -70,9 +71,9 @@ public class IncidentNotificationService {
 
         try {
             emailService.sendEmail(emailSettings, subject, body);
-            auditService.logEventSimple(SEND_EMAIL_SUCCESS, emailSettings.getRecipientEmail());
+            auditService.logEvent(SEND_EMAIL_SUCCESS, username, emailSettings.getRecipientEmail());
         } catch (Exception e) {
-            auditService.logEventSimple(SEND_EMAIL_FAIL, emailSettings.getRecipientEmail());
+            auditService.logEvent(SEND_EMAIL_FAIL, username, emailSettings.getRecipientEmail());
             e.printStackTrace();
         }
     }

@@ -93,8 +93,8 @@ public class EmailSettingsDAO {
 
             ps.executeUpdate();
 
-            auditService.logEventSimple(emailSettings.isEnabled() ? EMAIL_NOTIFICATION_ENABLE : EMAIL_NOTIFICATION_DISABLE,
-                    SecurityContextHolder.getContext().getAuthentication().getName());
+            auditService.logEvent(emailSettings.isEnabled() ? EMAIL_NOTIFICATION_ENABLE : EMAIL_NOTIFICATION_DISABLE,
+                    SecurityContextHolder.getContext().getAuthentication().getName(), SecurityContextHolder.getContext().getAuthentication().getName());
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save email settings", e);
         }

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import services.AuditService;
-import services.IncidentNotificationService;
+import services.IncidentAsyncService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,14 +34,14 @@ public class IncidentController {
     private static final int pageSize = 5;
     private final IncidentDAO incidentDAO;
     private final AuditService auditService;
-    private final IncidentNotificationService incidentNotificationService;
+    private final IncidentAsyncService incidentAsyncService;
     private String actionUser;
 
     @Autowired
-    public IncidentController(IncidentDAO incidentDAO, AuditService auditService, IncidentNotificationService incidentNotificationService) {
+    public IncidentController(IncidentDAO incidentDAO, AuditService auditService, IncidentAsyncService incidentNotificationService) {
         this.incidentDAO = incidentDAO;
         this.auditService = auditService;
-        this.incidentNotificationService = incidentNotificationService;
+        this.incidentAsyncService = incidentNotificationService;
     }
 
     // Отображение страницы инцидентов
@@ -104,12 +104,14 @@ public class IncidentController {
      */
     @PostMapping("/add")
     public ResponseEntity<?> addIncident(@RequestBody IncidentRequestDTO dto) {
-        log.info("Adding incident: {}", dto.getTitle());
 
+        log.info("Adding incident: {}", dto.getTitle());
         actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (incidentDAO.isIncidentExists(dto.getTitle())) {
-            auditService.logEvent(INCIDENT_CREATE_ERROR, actionUser, dto.getTitle(), "Инцидент с таким именем уже существует");
+            auditService.logEvent(INCIDENT_CREATE_ERROR, actionUser, dto.getTitle(),
+                    "Инцидент с таким именем уже существует");
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Инцидент с таким названием уже существует");
         }
@@ -123,14 +125,19 @@ public class IncidentController {
                 dto.getRecommendations()
         );
 
-        if (added.isPresent()) {
-            incidentNotificationService.notifyIfNeeded(added.get());
-            auditService.logEvent(INCIDENT_CREATED, actionUser, added.get().getTitle(), actionUser);
-                return ResponseEntity.status(HttpStatus.OK).body(toDto(added.get()));
-        } else {
+        if (added.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+
+        // Ответ отправляем сразу
+        ResponseEntity<?> response = ResponseEntity.ok(toDto(added.get()));
+
+        // Асинхронная обработка
+        incidentAsyncService.processAfterCreate(added.get(), actionUser);
+
+        return response;
     }
+
 
     /**
      * Удалить инцидент по ID
