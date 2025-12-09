@@ -56,11 +56,16 @@ public class EmailSettingsController {
 
         String result = notificationService.sendTestEmail();
 
-        if (result.startsWith("Тестовое письмо отправлено успешно")) {
-            return ResponseEntity.ok(result);
+        boolean success = result.startsWith("Тестовое письмо отправлено успешно");
+
+        if (success) {
+            return ResponseEntity.ok("Тестовое письмо отправлено успешно.");
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            log.error("Email test failed: {}", result);
+
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Не удалось отправить тестовое письмо. Проверьте настройки.");
         }
     }
-
 }
