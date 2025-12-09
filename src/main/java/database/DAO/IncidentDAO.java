@@ -5,19 +5,18 @@ import database.models.Incident;
 import enums.IncidentCategory;
 import enums.IncidentLevel;
 import enums.IncidentRecommendation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class IncidentDAO {
-    private static final Logger log = LoggerFactory.getLogger(IncidentDAO.class);
+
     private final Database database;
 
     public IncidentDAO(Database database) {

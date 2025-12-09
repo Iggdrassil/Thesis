@@ -3,7 +3,6 @@ package services;
 import database.DAO.AuditDAO;
 import database.DTO.AuditRecordDto;
 import enums.AuditEventType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;

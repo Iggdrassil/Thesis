@@ -13,8 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,7 +100,6 @@ public class StatisticsDAO {
     public List<StatisticsDto.DailyDto> getDailyStats(int days) {
 
         LocalDate cutoff = LocalDate.now().minusDays(days);
-        String cutoffStr = cutoff.toString(); // yyyy-MM-dd
 
         String sql = """
                 SELECT DATE(creation_date) AS day, COUNT(*) AS cnt

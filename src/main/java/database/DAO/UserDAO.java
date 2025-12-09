@@ -3,8 +3,7 @@ package database.DAO;
 import database.Database;
 import database.models.User;
 import enums.UserRole;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class UserDAO {
 
-    private static final Logger log = LoggerFactory.getLogger(UserDAO.class);
     private final Database database;
     private final PasswordEncoder passwordEncoder;
 

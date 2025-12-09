@@ -2,6 +2,7 @@ package database.DAO;
 
 import database.DTO.AuditRecordDto;
 import database.Database;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,9 +14,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class AuditDAO {
-    private static final Logger log = LoggerFactory.getLogger(AuditDAO.class);
+
     private final Database database;
 
     public AuditDAO(Database database) {

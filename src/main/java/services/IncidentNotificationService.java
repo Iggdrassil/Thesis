@@ -5,6 +5,7 @@ import database.models.EmailSettings;
 import database.models.Incident;
 import enums.IncidentRecommendation;
 import jakarta.mail.MessagingException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import static enums.AuditEventType.SEND_EMAIL_FAIL;
 import static enums.AuditEventType.SEND_EMAIL_SUCCESS;
 
+@Slf4j
 @Service
 @Component
 public class IncidentNotificationService {
@@ -74,7 +76,7 @@ public class IncidentNotificationService {
             auditService.logEvent(SEND_EMAIL_SUCCESS, username, emailSettings.getRecipientEmail());
         } catch (Exception e) {
             auditService.logEvent(SEND_EMAIL_FAIL, username, emailSettings.getRecipientEmail());
-            e.printStackTrace();
+            log.error("Send email failed {}", e.getMessage());
         }
     }
 
