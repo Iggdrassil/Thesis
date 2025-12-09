@@ -3,6 +3,7 @@ package controllers;
 import database.DAO.UserDAO;
 import database.DTO.EditUserDTO;
 import database.DTO.ErrorResponseDTO;
+import database.DTO.PageResultDTO;
 import database.DTO.UserDTO;
 import database.models.User;
 import enums.UserError;
@@ -16,6 +17,7 @@ import org.springframework.ui.Model;
 import java.security.Principal;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import other.PaginationUtils;
 import services.AuditService;
 
 import static enums.AuditEventType.*;
@@ -39,21 +41,13 @@ public class UserController {
     // ---------------- PAGE VIEW ----------------
 
     @GetMapping
-    public String usersPage(@RequestParam(defaultValue = "1") int page,
-                            Model model,
-                            Principal principal) {
+    public String usersPage(@RequestParam(defaultValue = "1") int page, Model model) {
 
-        List<User> allUsers = userDAO.getAllUsers();
-        int totalPages = Math.max(1, (int) Math.ceil((double) allUsers.size() / PAGE_SIZE));
+        PageResultDTO<User> result = PaginationUtils.paginateList(userDAO.getAllUsers(), page, PAGE_SIZE);
 
-        int start = Math.max(0, (page - 1) * PAGE_SIZE);
-        int end = Math.min(start + PAGE_SIZE, allUsers.size());
-        List<User> users = allUsers.subList(start, end);
-
-        model.addAttribute("currentUser", principal.getName());
-        model.addAttribute("users", users);
-        model.addAttribute("page", page);
-        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("users", result.getContent());
+        model.addAttribute("page", result.getPage());
+        model.addAttribute("totalPages", result.getTotalPages());
 
         return "userManagement";
     }
@@ -64,17 +58,12 @@ public class UserController {
     @GetMapping("/list")
     public Map<String, Object> getUsers(@RequestParam(defaultValue = "1") int page) {
 
-        List<User> allUsers = userDAO.getAllUsers();
-        int totalPages = Math.max(1, (int) Math.ceil((double) allUsers.size() / PAGE_SIZE));
-
-        int start = Math.max(0, (page - 1) * PAGE_SIZE);
-        int end = Math.min(start + PAGE_SIZE, allUsers.size());
-        List<User> paged = allUsers.subList(start, end);
+        PageResultDTO<User> result = PaginationUtils.paginateList(userDAO.getAllUsers(), page, PAGE_SIZE);
 
         return Map.of(
-                "users", paged,
-                "page", page,
-                "totalPages", totalPages
+                "users", result.getContent(),
+                "page", result.getPage(),
+                "totalPages", result.getTotalPages()
         );
     }
 

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import other.PaginationUtils;
 import services.AuditService;
 
 import java.util.HashMap;
@@ -20,12 +21,10 @@ import java.util.Map;
 @RequestMapping("/audit")
 public class AuditController {
 
-    private final AuditService service;
     private AuditDAO auditDAO;
 
     @Autowired
-    public AuditController(AuditService service, AuditDAO auditDAO) {
-        this.service = service;
+    public AuditController(AuditDAO auditDAO) {
         this.auditDAO = auditDAO;
     }
 
@@ -39,19 +38,18 @@ public class AuditController {
     public Map<String, Object> getList(@RequestParam(defaultValue = "1") int page) {
         log.info("Requesting list of audit records");
 
+        int total = auditDAO.count();
         int pageSize = 5;
 
-        int total = auditDAO.count();
         int totalPages = (int) Math.ceil((double) total / pageSize);
+        page = PaginationUtils.safePageNumber(page, totalPages);
 
-        if (page < 1) page = 1;
-        if (page > totalPages) page = totalPages;
+        int offset = PaginationUtils.offsetForPage(page, pageSize);
 
-        int from = (page - 1) * pageSize;
-
-        List<AuditRecordDto> list = auditDAO.getPaged(from, pageSize);
+        List<AuditRecordDto> list = auditDAO.getPaged(offset, pageSize);
 
         Map<String, Object> response = new HashMap<>();
+
         response.put("records", list);
         response.put("page", page);
         response.put("totalPages", totalPages);
