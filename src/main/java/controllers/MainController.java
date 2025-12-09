@@ -11,12 +11,16 @@ public class MainController {
 
     @GetMapping("/main")
     public String mainPage(@AuthenticationPrincipal org.springframework.security.core.userdetails.User principal, Model model) {
+
         model.addAttribute("username", principal.getUsername());
+
         String role = principal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)  // вернёт "ROLE_ADMIN", "ROLE_USER" и т.д.
                 .findFirst()
                 .orElse("USER");
+
         model.addAttribute("role", role);
+
         return "main"; // имя шаблона main.html
     }
 }

@@ -2,12 +2,14 @@ package controllers;
 
 import database.DAO.EmailSettingsDAO;
 import database.models.EmailSettings;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import services.IncidentNotificationService;
 
+@Slf4j
 @Controller
 @RequestMapping("/notifications/email")
 public class EmailSettingsController {
@@ -31,6 +33,8 @@ public class EmailSettingsController {
     @ResponseBody
     @GetMapping("/settings")
     public EmailSettings getSettings() {
+        log.info("Getting current email settings");
+
         return settingsDAO.load();
     }
 
@@ -38,6 +42,8 @@ public class EmailSettingsController {
     @ResponseBody
     @PutMapping("/updateSettings")
     public ResponseEntity<?> updateSettings(@RequestBody EmailSettings settings) {
+        log.info("Updating email settings");
+
         settingsDAO.save(settings);
         return ResponseEntity.ok().build();
     }
@@ -46,6 +52,8 @@ public class EmailSettingsController {
     @ResponseBody
     @PostMapping("/test")
     public ResponseEntity<String> testEmail() {
+        log.info("Sending test email");
+
         String result = notificationService.sendTestEmail();
 
         if (result.startsWith("Тестовое письмо отправлено успешно")) {

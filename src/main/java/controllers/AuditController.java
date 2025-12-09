@@ -1,8 +1,8 @@
 package controllers;
 
 import database.DAO.AuditDAO;
-import database.DAO.IncidentDAO;
 import database.DTO.AuditRecordDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Controller
 @RequestMapping("/audit")
 public class AuditController {
@@ -35,9 +36,9 @@ public class AuditController {
 
     @GetMapping("/list")
     @ResponseBody
-    public Map<String, Object> getList(
-            @RequestParam(defaultValue = "1") int page
-    ) {
+    public Map<String, Object> getList(@RequestParam(defaultValue = "1") int page) {
+        log.info("Requesting list of audit records");
+
         int pageSize = 5;
 
         int total = auditDAO.count();

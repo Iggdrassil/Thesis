@@ -2,9 +2,11 @@ package controllers;
 
 import database.DAO.UserDAO;
 import database.DTO.EditUserDTO;
+import database.DTO.ErrorResponseDTO;
 import database.DTO.UserDTO;
 import database.models.User;
-import org.springframework.http.HttpStatus;
+import enums.UserError;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -18,14 +20,15 @@ import services.AuditService;
 
 import static enums.AuditEventType.*;
 
+@Slf4j
 @Controller
 @RequestMapping("/users")
 public class UserController {
 
-    private static final int pageSize = 5;
+    private static final int PAGE_SIZE = 5;
+
     private final UserDAO userDAO;
     private final AuditService auditService;
-    private String actionUser;
 
     @Autowired
     public UserController(UserDAO userDAO, AuditService auditService) {
@@ -33,93 +36,120 @@ public class UserController {
         this.userDAO = userDAO;
     }
 
-    // Отображение страницы
-    @GetMapping
-    public String usersPage(@RequestParam(defaultValue = "1") int page, Model model, Principal principal) {
-        List<User> allUsers = userDAO.getAllUsers();
-        int totalPages = (int) Math.ceil((double) allUsers.size() / pageSize);
+    // ---------------- PAGE VIEW ----------------
 
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, allUsers.size());
-        List<User> usersOnPage = allUsers.subList(start, end);
+    @GetMapping
+    public String usersPage(@RequestParam(defaultValue = "1") int page,
+                            Model model,
+                            Principal principal) {
+
+        List<User> allUsers = userDAO.getAllUsers();
+        int totalPages = Math.max(1, (int) Math.ceil((double) allUsers.size() / PAGE_SIZE));
+
+        int start = Math.max(0, (page - 1) * PAGE_SIZE);
+        int end = Math.min(start + PAGE_SIZE, allUsers.size());
+        List<User> users = allUsers.subList(start, end);
 
         model.addAttribute("currentUser", principal.getName());
-        model.addAttribute("users", usersOnPage);
+        model.addAttribute("users", users);
         model.addAttribute("page", page);
         model.addAttribute("totalPages", totalPages);
 
-        return "userManagement"; // userManagement.html в templates/
+        return "userManagement";
     }
 
-    // REST-запрос на получение пользователей
+    // ---------------- REST API ----------------
+
+    @ResponseBody
     @GetMapping("/list")
-    @ResponseBody
     public Map<String, Object> getUsers(@RequestParam(defaultValue = "1") int page) {
+
         List<User> allUsers = userDAO.getAllUsers();
-        int totalPages = (int) Math.ceil((double) allUsers.size() / pageSize);
+        int totalPages = Math.max(1, (int) Math.ceil((double) allUsers.size() / PAGE_SIZE));
 
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, allUsers.size());
-        List<User> usersOnPage = allUsers.subList(start, end);
+        int start = Math.max(0, (page - 1) * PAGE_SIZE);
+        int end = Math.min(start + PAGE_SIZE, allUsers.size());
+        List<User> paged = allUsers.subList(start, end);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("users", usersOnPage);
-        response.put("totalPages", totalPages);
-        response.put("page", page);
-        return response;
+        return Map.of(
+                "users", paged,
+                "page", page,
+                "totalPages", totalPages
+        );
     }
 
-    @PostMapping("/add")
     @ResponseBody
-    public ResponseEntity<?> addUser(@RequestBody UserDTO userDto) {
-        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+    @PostMapping("/add")
+    public ResponseEntity<?> addUser(@RequestBody UserDTO dto) {
+        String actionUser = getCurrentUser();
+        log.info("Attempt to create user {}", dto.getUsername());
 
-        if (userDAO.isUserExists(userDto.getUsername())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        if (dto.getUsername() == null || dto.getUsername().isBlank()) {
+            return error(UserError.INVALID_INPUT);
         }
-        userDAO.addUser(userDto.getUsername(), userDto.getPassword(), userDto.getRole());
-        auditService.logEvent(USER_CREATED, actionUser, actionUser, userDto.getUsername(), userDto.getRole().getRoleName());
+
+        if (userDAO.isUserExists(dto.getUsername())) {
+            return error(UserError.USER_ALREADY_EXISTS);
+        }
+
+        Optional<?> created = userDAO.addUser(dto.getUsername(), dto.getPassword(), dto.getRole());
+
+        if (created.isEmpty()) {
+            return error(UserError.USER_CREATE_FAILED);
+        }
+
+        auditService.logEvent(USER_CREATED, actionUser, actionUser,
+                dto.getUsername(), dto.getRole().getRoleName());
 
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/delete/{username}")
     @ResponseBody
+    @DeleteMapping("/delete/{username}")
     public ResponseEntity<?> deleteUser(@PathVariable String username, Principal principal) {
-        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        String actionUser = getCurrentUser();
+        log.info("Attempt to delete user {}", username);
 
         // нельзя удалить себя
-        String current = principal.getName();
-        if (current.equals(username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "Нельзя удалить самого себя"));
+        if (principal.getName().equals(username)) {
+            return error(UserError.CANNOT_DELETE_SELF);
         }
 
         Optional<User> deleted = userDAO.deleteUser(username);
-        if (deleted.isPresent()) {
-            auditService.logEvent(USER_DELETED, actionUser, actionUser, deleted.get().getUsername(), deleted.get().getRole().getRoleName());
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Пользователь не найден"));
+
+        if (deleted.isEmpty()) {
+            return error(UserError.USER_NOT_FOUND);
         }
+
+        auditService.logEvent(
+                USER_DELETED,
+                actionUser,
+                actionUser,
+                deleted.get().getUsername(),
+                deleted.get().getRole().getRoleName()
+        );
+
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/edit")
     @ResponseBody
+    @PutMapping("/edit")
     public ResponseEntity<?> editUser(@RequestBody EditUserDTO dto, Principal principal) {
-        String actionUser = principal.getName();
 
-        // Нельзя менять себя на другое имя → предотвращаем вынос текущего логина
-        if (dto.getOldUsername().equals(actionUser) && !dto.getOldUsername().equals(dto.getNewUsername())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message","Нельзя менять свое имя пользователя"));
+        String actionUser = principal.getName();
+        log.info("Editing user {}", dto.getOldUsername());
+
+        // запрет менять себя на другое имя
+        if (dto.getOldUsername().equals(actionUser)
+                && !dto.getOldUsername().equals(dto.getNewUsername())) {
+            return error(UserError.CANNOT_RENAME_SELF);
         }
 
-        // Проверка существования нового имени
+        // запрет переименования в уже существующее имя
         if (!dto.getOldUsername().equals(dto.getNewUsername())
                 && userDAO.isUserExists(dto.getNewUsername())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return error(UserError.USER_ALREADY_EXISTS);
         }
 
         Optional<User> edited = userDAO.editUser(
@@ -130,7 +160,7 @@ public class UserController {
         );
 
         if (edited.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return error(UserError.USER_EDIT_FAILED);
         }
 
         auditService.logEvent(
@@ -143,21 +173,27 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    // REST — получить одного пользователя по username
-    @GetMapping("/get/{username}")
     @ResponseBody
+    @GetMapping("/get/{username}")
     public ResponseEntity<?> getUser(@PathVariable String username) {
+        Optional<User> user = userDAO.getUserByUsername(username);
 
-        Optional<User> userOpt = userDAO.getUserByUsername(username);
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Пользователь не найден"));
+        if (user.isEmpty()) {
+            return error(UserError.USER_NOT_FOUND);
         }
 
-        return ResponseEntity.ok(userOpt.get());
+        return ResponseEntity.ok(user.get());
     }
 
+    // ---------------- HELPERS ----------------
 
+    private String getCurrentUser() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
 
+    private ResponseEntity<ErrorResponseDTO> error(UserError e) {
+        return ResponseEntity
+                .status(e.getStatus())
+                .body(new ErrorResponseDTO(e.name(), e.getMessage()));
+    }
 }

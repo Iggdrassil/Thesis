@@ -1,16 +1,17 @@
 package controllers;
 
 import database.DAO.IncidentDAO;
+import database.DTO.EnumLocalizedDto;
+import database.DTO.ErrorResponseDTO;
 import database.DTO.IncidentRequestDTO;
 import database.DTO.IncidentResponseDTO;
 import database.models.Incident;
 import enums.IncidentCategory;
+import enums.IncidentError;
 import enums.IncidentLevel;
 import enums.IncidentRecommendation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,97 +27,95 @@ import java.util.stream.Collectors;
 
 import static enums.AuditEventType.*;
 
+@Slf4j
 @Controller
 @RequestMapping("/incidents")
 public class IncidentController {
 
-    private static final Logger log = LoggerFactory.getLogger(IncidentController.class);
-    private static final int pageSize = 5;
+    private static final int PAGE_SIZE = 5;
     private final IncidentDAO incidentDAO;
     private final AuditService auditService;
     private final IncidentAsyncService incidentAsyncService;
-    private String actionUser;
 
     @Autowired
-    public IncidentController(IncidentDAO incidentDAO, AuditService auditService, IncidentAsyncService incidentNotificationService) {
+    public IncidentController(IncidentDAO incidentDAO,
+                              AuditService auditService,
+                              IncidentAsyncService incidentAsyncService) {
         this.incidentDAO = incidentDAO;
         this.auditService = auditService;
-        this.incidentAsyncService = incidentNotificationService;
+        this.incidentAsyncService = incidentAsyncService;
     }
 
-    // Отображение страницы инцидентов
+    // ---------- PAGE VIEW ----------
+
     @GetMapping
     public String incidentsPage(@RequestParam(defaultValue = "1") int page,
                                 Model model,
                                 @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal) {
 
-        // Получаем все инциденты
         List<Incident> allIncidents = incidentDAO.getAllIncidents();
-        int totalPages = (int) Math.ceil((double) allIncidents.size() / pageSize);
 
-        // Вычисляем подсписок для текущей страницы
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, allIncidents.size());
+        int totalPages = Math.max(1, (int) Math.ceil((double) allIncidents.size() / PAGE_SIZE));
+        int start = Math.max(0, (page - 1) * PAGE_SIZE);
+        int end = Math.min(start + PAGE_SIZE, allIncidents.size());
+
         List<Incident> incidentsOnPage = allIncidents.subList(start, end);
 
         String role = principal.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)  // вернёт "ROLE_ADMIN", "ROLE_USER" и т.д.
+                .map(GrantedAuthority::getAuthority)
                 .findFirst()
                 .orElse("USER");
+
         model.addAttribute("role", role);
-        // Добавляем данные в модель
         model.addAttribute("currentUser", principal.getUsername());
         model.addAttribute("incidents", incidentsOnPage);
         model.addAttribute("page", page);
         model.addAttribute("totalPages", totalPages);
 
-        // Возвращаем страницу
-        return "incidents"; // incidents.html в templates/
+        return "incidents";
     }
 
-    /**
-     * Получить список всех инцидентов
-     */
+    // ---------- API ----------
+
     @GetMapping("/list")
-    public ResponseEntity<List<IncidentResponseDTO>> getAllIncidents(
+    public ResponseEntity<?> getAllIncidents(
             @RequestParam(value = "page", required = false) Integer page) {
 
-        List<Incident> allIncidents = incidentDAO.getAllIncidents();
+        List<Incident> all = incidentDAO.getAllIncidents();
 
-        // Если передан параметр page — делаем простую пагинацию
         if (page != null && page > 0) {
-            int fromIndex = (page - 1) * pageSize;
-            if (fromIndex >= allIncidents.size()) {
-                return ResponseEntity.ok(Collections.emptyList());
-            }
-            int toIndex = Math.min(fromIndex + pageSize, allIncidents.size());
-            allIncidents = allIncidents.subList(fromIndex, toIndex);
+            int from = (page - 1) * PAGE_SIZE;
+            if (from >= all.size()) return ResponseEntity.ok(Collections.emptyList());
+            int to = Math.min(from + PAGE_SIZE, all.size());
+            all = all.subList(from, to);
         }
 
-        List<IncidentResponseDTO> response = allIncidents.stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(all.stream().map(this::toDto).toList());
     }
 
-    /**
-     * Добавить новый инцидент
-     */
     @PostMapping("/add")
     public ResponseEntity<?> addIncident(@RequestBody IncidentRequestDTO dto) {
 
-        log.info("Adding incident: {}", dto.getTitle());
-        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String user = getCurrentUser();
 
-        if (incidentDAO.isIncidentExists(dto.getTitle())) {
-            auditService.logEvent(INCIDENT_CREATE_ERROR, actionUser, dto.getTitle(),
-                    "Инцидент с таким именем уже существует");
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Инцидент с таким названием уже существует");
+        // Проверка DTO
+        if (dto.getTitle() == null || dto.getTitle().isBlank()) {
+            return error(IncidentError.INVALID_INPUT);
         }
 
-        Optional<Incident> added = incidentDAO.addIncident(
+        if (incidentDAO.isIncidentExists(dto.getTitle())) {
+
+            auditService.logEvent(
+                    INCIDENT_CREATE_ERROR,
+                    user,
+                    dto.getTitle(),
+                    IncidentError.INCIDENT_ALREADY_EXISTS.getMessage()
+            );
+
+            return error(IncidentError.INCIDENT_ALREADY_EXISTS);
+        }
+
+        Optional<Incident> created = incidentDAO.addIncident(
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getAuthor(),
@@ -125,58 +124,50 @@ public class IncidentController {
                 dto.getRecommendations()
         );
 
-        if (added.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (created.isEmpty()) {
+            return error(IncidentError.INCIDENT_CREATE_FAILED);
         }
 
-        // Ответ отправляем сразу
-        ResponseEntity<?> response = ResponseEntity.ok(toDto(added.get()));
+        Incident incident = created.get();
+        ResponseEntity<?> response = ResponseEntity.ok(toDto(incident));
 
-        // Асинхронная обработка
-        incidentAsyncService.processAfterCreate(added.get(), actionUser);
+        // асинхронная обработка
+        incidentAsyncService.processAfterCreate(incident, user);
 
         return response;
     }
 
-
-    /**
-     * Удалить инцидент по ID
-     */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteIncident(@PathVariable("id") UUID id) {
-        log.info("Deleting incident: {}", id);
+    public ResponseEntity<?> deleteIncident(@PathVariable UUID id) {
+        log.info("Deleting incident {}", id);
 
-        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String user = getCurrentUser();
 
         Optional<Incident> deleted = incidentDAO.deleteIncident(id);
-        if (deleted.isPresent()) {
 
-            auditService.logEvent(INCIDENT_DELETED, actionUser, deleted.get().getTitle(), actionUser);
-
-            return ResponseEntity.ok(toDto(deleted.get()));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Инцидент не найден");
+        if (deleted.isEmpty()) {
+            return error(IncidentError.INCIDENT_NOT_FOUND);
         }
+
+        auditService.logEvent(INCIDENT_DELETED, user, deleted.get().getTitle(), user);
+        return ResponseEntity.ok(toDto(deleted.get()));
     }
 
-    /**
-     * Изменить инцидент (частичное обновление)
-     */
     @PatchMapping("/edit/{id}")
-    public ResponseEntity<?> editIncident(@PathVariable("id") UUID id,
+    public ResponseEntity<?> editIncident(@PathVariable UUID id,
                                           @RequestBody IncidentRequestDTO dto) {
-        log.info("Editing incident: {}", id);
+        log.info("Editing incident {}", id);
 
-        actionUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String user = getCurrentUser();
 
         Optional<Incident> existing = incidentDAO.findIncident(id);
+
         if (existing.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Инцидент не найден");
+            return error(IncidentError.INCIDENT_NOT_FOUND);
         }
 
         Incident old = existing.get();
+
         Optional<Incident> updated = incidentDAO.editIncident(
                 id,
                 dto.getTitle() != null ? dto.getTitle() : old.getTitle(),
@@ -186,70 +177,68 @@ public class IncidentController {
                 dto.getRecommendations() != null ? dto.getRecommendations() : old.getIncidentRecommendations()
         );
 
-        if (updated.isPresent()) {
-
-            auditService.logEvent(INCIDENT_UPDATED, actionUser, updated.get().getTitle(), actionUser);
-
-            return ResponseEntity.ok(toDto(updated.get()));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Инцидент не найден");
+        if (updated.isEmpty()) {
+            return error(IncidentError.INCIDENT_UPDATE_FAILED);
         }
+
+        auditService.logEvent(INCIDENT_UPDATED, user, updated.get().getTitle(), user);
+        return ResponseEntity.ok(toDto(updated.get()));
     }
 
-    @GetMapping("/categories")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getIncidentById(@PathVariable UUID id) {
+        Optional<Incident> incident = incidentDAO.findIncident(id);
+
+        if (incident.isEmpty()) {
+            return error(IncidentError.INCIDENT_NOT_FOUND);
+        }
+
+        return ResponseEntity.ok(toDto(incident.get()));
+    }
+
+    // ---------- ENUM LOCALIZED DTO ----------
+
+
     @ResponseBody
+    @GetMapping("/categories")
     public List<EnumLocalizedDto> getCategories() {
         return Arrays.stream(IncidentCategory.values())
                 .map(c -> new EnumLocalizedDto(c.name(), c.getLabel()))
                 .toList();
     }
 
-    @GetMapping("/levels")
     @ResponseBody
+    @GetMapping("/levels")
     public List<EnumLocalizedDto> getLevels() {
         return Arrays.stream(IncidentLevel.values())
                 .map(l -> new EnumLocalizedDto(l.name(), l.getLabel()))
                 .toList();
     }
 
-    @GetMapping("/recommendations")
     @ResponseBody
+    @GetMapping("/recommendations")
     public List<EnumLocalizedDto> getRecommendations() {
         return Arrays.stream(IncidentRecommendation.values())
                 .map(r -> new EnumLocalizedDto(r.name(), r.getLabel()))
                 .toList();
     }
 
-    /**
-     * Получить один инцидент по ID
-     */
-    @GetMapping("/{id}")
-    @ResponseBody
-    public ResponseEntity<?> getIncidentById(@PathVariable("id") UUID id) {
-        Optional<Incident> incident = incidentDAO.findIncident(id);
+    // ---------- HELPERS ----------
 
-        if (incident.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Инцидент не найден");
-        }
-
-
-        return ResponseEntity.ok(toDto(incident.get()));
+    private String getCurrentUser() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
-    public record EnumLocalizedDto(String value, String label) {}
+    private ResponseEntity<ErrorResponseDTO> error(IncidentError error) {
+        return ResponseEntity
+                .status(error.getStatus())
+                .body(new ErrorResponseDTO(error.name(), error.getMessage()));
+    }
 
-
-    /**
-     * Конвертация в DTO
-     */
     private IncidentResponseDTO toDto(Incident incident) {
-        List<String> recLoc = new ArrayList<>();
-
-        if (!incident.getIncidentRecommendations().isEmpty()) {
-            incident.getIncidentRecommendations().forEach(incidentRecommendation -> recLoc.add(incidentRecommendation.getLabel()));
-        }
+        List<String> recLabels = incident.getIncidentRecommendations().stream()
+                .map(IncidentRecommendation::getLabel)
+                .collect(Collectors.toList());
 
         return new IncidentResponseDTO(
                 incident.getId(),
@@ -260,8 +249,9 @@ public class IncidentController {
                 incident.getUpdatedDate(),
                 incident.getIncidentCategory(),
                 incident.getIncidentLevel(),
-                incident.getIncidentRecommendations(), incident.getIncidentCategory().getLabel(),
-                recLoc
+                incident.getIncidentRecommendations(),
+                incident.getIncidentCategory().getLabel(),
+                recLabels
         );
     }
 }

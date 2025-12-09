@@ -47,8 +47,8 @@ public class StatisticsController {
     /**
      * API — статистика по уровням важности
      */
-    @GetMapping("/api/importance")
     @ResponseBody
+    @GetMapping("/api/importance")
     public ResponseEntity<List<StatisticsDto.ImportanceDto>> getImportanceStats() {
         return ResponseEntity.ok(statisticsDAO.getImportanceStats());
     }
@@ -56,8 +56,8 @@ public class StatisticsController {
     /**
      * API — статистика по категориям
      */
-    @GetMapping("/api/categories")
     @ResponseBody
+    @GetMapping("/api/categories")
     public ResponseEntity<List<StatisticsDto.CategoryDto>> getCategoryStats() {
         return ResponseEntity.ok(statisticsDAO.getCategoryStats());
     }
@@ -65,8 +65,8 @@ public class StatisticsController {
     /**
      * API — статистика по дням
      */
-    @GetMapping("/api/daily")
     @ResponseBody
+    @GetMapping("/api/daily")
     public ResponseEntity<List<StatisticsDto.DailyDto>> getDailyStats(
             @RequestParam(value = "days", required = false, defaultValue = "30") int days
     ) {
