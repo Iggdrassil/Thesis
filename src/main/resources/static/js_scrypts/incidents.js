@@ -42,6 +42,11 @@ const editTitleInput = document.getElementById("editIncidentTitle");
 const editDescInput = document.getElementById("editIncidentDescription");
 const editCategorySelect = document.getElementById("editIncidentCategory");
 const editLevelSelect = document.getElementById("editIncidentLevel");
+const list = document.getElementById("incidentList");
+
+const PAGE_SIZE = 5;
+
+const noIncidents = document.getElementById("noIncidents");
 
 const role = document.body.dataset.role; // Thymeleaf вставит значение из сессии
 
@@ -86,6 +91,21 @@ document.addEventListener("DOMContentLoaded", () => {
 function openIncidentModal(){
     modal.style.display = "flex";
     modal.setAttribute("aria-hidden","false");
+
+    // Сброс формы
+    titleInput.value = "";
+    descInput.value = "";
+    categorySelect.value = "";
+    levelSelect.value = "";
+
+    // Сбрасываем выбранные рекомендации
+    selectedRecommendations = [];
+
+    // Снимаем галки со всех чекбоксов
+    document.querySelectorAll("#recsList input[type='checkbox']").forEach(cb => cb.checked = false);
+
+    // Переключаем кнопку создания
+    validateForm();
 }
 function closeIncidentModal(){
     modal.style.display = "none";
@@ -208,8 +228,11 @@ async function submitCreateIncident(){
             return;
         }
 
+        // сброс выбранных рекомендаций **непосредственно после успешного создания**
+        selectedRecommendations = [];
+
         closeIncidentModal();
-        location.reload();
+        await loadIncidents(currentIncidentPage);
 
     } catch(e){
         console.error(e);
@@ -482,7 +505,7 @@ async function submitEditIncident() {
         }
 
         closeEditIncidentModal();
-        location.reload(); // единообразно с созданием
+        await loadIncidents(currentIncidentPage);
 
     } catch (e) {
         console.error(e);
@@ -522,7 +545,17 @@ document.getElementById("confirmDeleteBtn").addEventListener("click", async () =
             // Успешно удалено
             document.getElementById("deleteIncidentModal").style.display = "none";
             currentDeleteId = null;
-            location.reload(); // обновляем список
+
+            // Получаем общее число инцидентов
+            const totalIncidents = await getTotalIncidents();
+            const totalPages = Math.ceil(totalIncidents / PAGE_SIZE);
+
+            // Если текущая страница стала пустой, переключаемся на предыдущую
+            if (currentIncidentPage > totalPages) {
+                currentIncidentPage = totalPages > 0 ? totalPages : 1;
+            }
+
+            await loadIncidents(currentIncidentPage); // обновляем список
         } else if (response.status === 404) {
             alert("Инцидент не найден");
         } else {
@@ -533,6 +566,164 @@ document.getElementById("confirmDeleteBtn").addEventListener("click", async () =
     }
 });
 
+// --- ПАГИНАЦИЯ ---
+
+let currentIncidentPage = 1; // текущая страница
+
+// Загрузка и рендер инцидентов
+async function loadIncidents(page = 1) {
+    try {
+        const resp = await fetch(`/incidents/list?page=${page}`);
+        if (!resp.ok) throw new Error("Ошибка при загрузке инцидентов");
+        const data = await resp.json();
+
+        currentIncidentPage = page;
+        renderIncidents(data);
+        renderIncidentPagination(page, Math.ceil(await getTotalIncidents() / PAGE_SIZE));
+    } catch (e) {
+        console.error(e);
+        incidentList.innerHTML = "";
+        noIncidents.style.display = "block";
+        pagination.innerHTML = "";
+    }
+}
+
+// Функция для получения общего числа инцидентов
+async function getTotalIncidents() {
+    try {
+        const resp = await fetch('/incidents/list');
+        if (!resp.ok) throw new Error("Ошибка при получении количества инцидентов");
+        const data = await resp.json();
+        return data.length;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
+}
+
+// Рендер списка
+function renderIncidents(incidents) {
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    if (!incidents || incidents.length === 0) {  // ← исправлено
+        if (noIncidents) noIncidents.style.display = "block";
+        return;
+    } else {
+        if (noIncidents) noIncidents.style.display = "none";
+    }
+
+    incidents.forEach(incident => {
+        const creationDate = incident.creationDate
+            ? incident.creationDate.replace('T', ' ').split('.')[0] // <--- форматирование даты
+            : "";
+
+        const item = document.createElement("div");
+        item.className = "incident-item";
+        item.setAttribute("data-id", incident.id);
+
+        item.innerHTML = `
+            <div class="incident-info">
+                <strong>${incident.title}</strong>
+                <span>${incident.description ?? ""}</span>
+            </div>
+            <div class="incident-meta1">
+                <span>${creationDate}</span>
+                <span class="incident-level ${incident.level?.toLowerCase() ?? ""}">
+                    ${incident.levelLocalized ?? ""}
+                </span>
+            </div>
+            <div class="incident-meta2">
+                <div class="incident-cat" data-full-text="${incident.categoryLocalized ?? ""}">
+                    <span class="cat-text">${incident.categoryLocalized ?? ""}</span>
+                </div>
+            </div>
+            <div class="incident-actions">
+                <button class="edit-btn" title="Редактировать" data-id="${incident.id}">
+                    <img src="/web/static/icons/edit.png" alt="Редактировать инцидент">
+                </button>
+                <button class="delete-btn" title="Удалить" data-id="${incident.id}">
+                    <img src="/web/static/icons/delete.png" alt="Удалить инцидент">
+                </button>
+            </div>
+        `;
+        incidentList.appendChild(item);
+    });
+}
+
+// Рендер пагинации
+function renderIncidentPagination(page, totalPages) {
+    const box = pagination;
+    box.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    const maxVisible = 5; // макс. видимых кнопок страниц
+
+    // кнопка назад
+    if (page > 1) box.appendChild(pageBtn("←", () => loadIncidents(page - 1)));
+
+    let start = 1;
+    let end = totalPages;
+
+    if (totalPages > maxVisible) {
+        start = Math.max(1, page - Math.floor(maxVisible / 2));
+        end = start + maxVisible - 1;
+
+        if (end > totalPages) {
+            end = totalPages;
+            start = end - maxVisible + 1;
+        }
+    }
+
+    if (start > 1) {
+        box.appendChild(pageBtn(1, () => loadIncidents(1)));
+        if (start > 2) {
+            const dots = document.createElement("span");
+            dots.className = "dots";
+            dots.textContent = "...";
+            dots.style.cursor = "pointer";
+            dots.onclick = () => loadIncidents(Math.max(1, start - Math.floor(maxVisible / 2)));
+            box.appendChild(dots);
+        }
+    }
+
+    for (let p = start; p <= end; p++) {
+        const btn = pageBtn(p, () => loadIncidents(p));
+        if (p === page) btn.classList.add("active");
+        box.appendChild(btn);
+    }
+
+    if (end < totalPages) {
+        if (end < totalPages - 1) {
+            const dots = document.createElement("span");
+            dots.className = "dots";
+            dots.textContent = "...";
+            dots.style.cursor = "pointer";
+            dots.onclick = () => loadIncidents(Math.min(totalPages, end + Math.floor(maxVisible / 2)));
+            box.appendChild(dots);
+        }
+        box.appendChild(pageBtn(totalPages, () => loadIncidents(totalPages)));
+    }
+
+    // кнопка вперед
+    if (page < totalPages) box.appendChild(pageBtn("→", () => loadIncidents(page + 1)));
+}
+
+// Кнопка страницы
+function pageBtn(text, handler) {
+    const b = document.createElement("button");
+    b.className = "page-btn";
+    b.textContent = text;
+    b.onclick = handler;
+    return b;
+}
+
+// Загружаем первую страницу при старте
+document.addEventListener("DOMContentLoaded", () => {
+    loadIncidents(currentIncidentPage);
+});
 
 
 

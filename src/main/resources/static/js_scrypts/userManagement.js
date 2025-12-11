@@ -282,7 +282,7 @@ async function fetchUsers(page) {
     }
 }
 
-async function render(page) {
+async function render(page = 1) {
     const data = await fetchUsers(page);
     userList.innerHTML = "";
     pagination.innerHTML = "";
@@ -304,15 +304,24 @@ async function render(page) {
             <span>${user.role}</span>
         </div>
         <div class="user-actions">
-            <button class="icon-button" title="Редактировать" onclick="editUser('${user.username}')">
+            <button class="icon-button" title="Редактировать">
                 <img src="/web/static/icons/edit.png" alt="Редактировать">
             </button>
-            <button class="icon-button ${isCurrentUser ? 'disabled' : ''}" title="Удалить" onclick="deleteUser('${user.username}')"
-                ${isCurrentUser ? 'disabled' : ''} onclick="${isCurrentUser ? '' : `deleteUser('${user.username}')`}">
+            <button class="icon-button ${isCurrentUser ? 'disabled' : ''}" title="Удалить"
+                ${isCurrentUser ? 'disabled' : ''}>
                 <img src="/web/static/icons/${isCurrentUser ? 'deleteUnable.png' : 'delete.png'}" alt="Удалить">
             </button>
         </div>
-    `;
+        `;
+
+        // делегируем события на кнопки
+        const editBtn = li.querySelector(".user-actions button:first-child");
+        editBtn.addEventListener("click", () => editUser(user.username));
+
+        const deleteBtn = li.querySelector(".user-actions button:last-child");
+        if (!isCurrentUser) {
+            deleteBtn.addEventListener("click", () => deleteUser(user.username));
+        }
 
         userList.appendChild(li);
     });
@@ -320,18 +329,73 @@ async function render(page) {
     // скрываем скролл при пагинации
     userList.style.overflowY = data.totalPages > 1 ? "hidden" : "auto";
 
-    // пагинация
-    for (let i = 1; i <= data.totalPages; i++) {
-        const btn = document.createElement("button");
-        btn.textContent = i;
-        btn.classList.add("page-btn");
-        if (i === data.page) btn.classList.add("active");
-        btn.addEventListener("click", () => {
-            window.location.href = `/users?page=${i}`;
-        });
-        pagination.appendChild(btn);
-    }
+    renderPagination(data.page, data.totalPages);
 }
+
+function renderPagination(currentPage, totalPages) {
+    const box = pagination;
+    box.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    const maxVisible = 5;
+
+    if (currentPage > 1) box.appendChild(pageBtn("←", () => render(currentPage - 1)));
+
+    let start = 1;
+    let end = totalPages;
+
+    if (totalPages > maxVisible) {
+        start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        end = start + maxVisible - 1;
+
+        if (end > totalPages) {
+            end = totalPages;
+            start = end - maxVisible + 1;
+        }
+    }
+
+    if (start > 1) {
+        box.appendChild(pageBtn(1, () => render(1)));
+        if (start > 2) {
+            const dots = document.createElement("span");
+            dots.className = "dots";
+            dots.textContent = "...";
+            dots.style.cursor = "pointer";
+            dots.onclick = () => render(Math.max(1, start - Math.floor(maxVisible / 2)));
+            box.appendChild(dots);
+        }
+    }
+
+    for (let i = start; i <= end; i++) {
+        const btn = pageBtn(i, () => render(i));
+        if (i === currentPage) btn.classList.add("active");
+        box.appendChild(btn);
+    }
+
+    if (end < totalPages) {
+        if (end < totalPages - 1) {
+            const dots = document.createElement("span");
+            dots.className = "dots";
+            dots.textContent = "...";
+            dots.style.cursor = "pointer";
+            dots.onclick = () => render(Math.min(totalPages, end + Math.floor(maxVisible / 2)));
+            box.appendChild(dots);
+        }
+        box.appendChild(pageBtn(totalPages, () => render(totalPages)));
+    }
+
+    if (currentPage < totalPages) box.appendChild(pageBtn("→", () => render(currentPage + 1)));
+}
+
+function pageBtn(text, handler) {
+    const btn = document.createElement("button");
+    btn.className = "page-btn";
+    btn.textContent = text;
+    btn.addEventListener("click", handler);
+    return btn;
+}
+
 
 async function loadUser(username) {
     const resp = await fetch(`/users/get/${encodeURIComponent(username)}`);

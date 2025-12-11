@@ -29,7 +29,7 @@
         <h3>Заведенные в системе инциденты информационной безопасности</h3>
 
         <!-- Список инцидентов -->
-        <div class="incident-list" th:if="${!#lists.isEmpty(incidents)}">
+        <div class="incident-list" id="incidentList" th:if="${!#lists.isEmpty(incidents)}">
             <div class="incident-item"
                  th:each="incident : ${incidents}"
                  th:attr="data-id=${incident.id}">
@@ -72,26 +72,13 @@
         </div>
 
         <!-- Если нет инцидентов -->
-        <div class="no-incidents" th:if="${#lists.isEmpty(incidents)}">
+        <div class="no-incidents" id="noIncidents" style="display:none;">
             Инциденты отсутствуют
         </div>
 
         <!-- Пагинация -->
-        <div class="pagination" th:if="${totalPages > 1}">
-            <button class="page-btn"
-                    th:if="${page > 1}"
-                    th:onclick="'window.location.href=\'/incidents?page=' + (${page}-1) + '\''">←</button>
+        <div class="pagination" id="pagination"></div>
 
-            <button class="page-btn"
-                    th:each="p : ${#numbers.sequence(1, totalPages)}"
-                    th:text="${p}"
-                    th:classappend="${p == page} ? 'active' : ''"
-                    th:onclick="'window.location.href=\'/incidents?page=' + ${p} + '\''"></button>
-
-            <button class="page-btn"
-                    th:if="${page < totalPages}"
-                    th:onclick="'window.location.href=\'/incidents?page=' + (${page}+1) + '\''">→</button>
-        </div>
     </div>
 
     <!-- Кнопка добавления -->
@@ -99,6 +86,7 @@
         <img src="/web/static/icons/addInc.png" alt="Добавить инцидент">
     </button>
 </div>
+
 <!-- МОДАЛКА: ДОБАВЛЕНИЕ ИНЦИДЕНТА -->
 <div id="incidentModal" class="modal-overlay" aria-hidden="true">
     <div class="modal-frame">       <!-- тёмная рамка -->

@@ -43,26 +43,69 @@ function renderList(records) {
     });
 }
 
-function renderPagination(page, total) {
+function renderPagination(page, totalPages) {
     const box = document.getElementById("pagination");
     box.innerHTML = "";
 
-    if (total <= 1) return;
+    if (totalPages <= 1) return;
 
+    const maxVisible = 5; // максимальное число видимых кнопок страниц (без ← → и ...)
+
+    // кнопка назад
     if (page > 1) {
         box.appendChild(pageBtn("←", () => loadAudit(page - 1)));
     }
 
-    for (let p = 1; p <= total; p++) {
+    let start = 1;
+    let end = totalPages;
+
+    if (totalPages > maxVisible) {
+        // если всего страниц больше maxVisible, определяем сдвиг
+        start = Math.max(1, page - Math.floor(maxVisible / 2));
+        end = start + maxVisible - 1;
+
+        if (end > totalPages) {
+            end = totalPages;
+            start = end - maxVisible + 1;
+        }
+    }
+
+    if (start > 1) {
+        box.appendChild(pageBtn(1, () => loadAudit(1)));
+        if (start > 2) {
+            const dots = document.createElement("span");
+            dots.className = "dots";
+            dots.textContent = "...";
+            dots.style.cursor = "pointer";
+            dots.onclick = () => loadAudit(Math.max(1, start - Math.floor(maxVisible / 2)));
+            box.appendChild(dots);
+        }
+    }
+
+    for (let p = start; p <= end; p++) {
         const btn = pageBtn(p, () => loadAudit(p));
         if (p === page) btn.classList.add("active");
         box.appendChild(btn);
     }
 
-    if (page < total) {
+    if (end < totalPages) {
+        if (end < totalPages - 1) {
+            const dots = document.createElement("span");
+            dots.className = "dots";
+            dots.textContent = "...";
+            dots.style.cursor = "pointer";
+            dots.onclick = () => loadAudit(Math.min(totalPages, end + Math.floor(maxVisible / 2)));
+            box.appendChild(dots);
+        }
+        box.appendChild(pageBtn(totalPages, () => loadAudit(totalPages)));
+    }
+
+    // кнопка вперед
+    if (page < totalPages) {
         box.appendChild(pageBtn("→", () => loadAudit(page + 1)));
     }
 }
+
 
 function pageBtn(text, handler) {
     const b = document.createElement("button");

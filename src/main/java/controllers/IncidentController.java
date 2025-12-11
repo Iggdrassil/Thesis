@@ -242,6 +242,7 @@ public class IncidentController {
                 incident.getIncidentLevel(),
                 incident.getIncidentRecommendations(),
                 incident.getIncidentCategory().getLabel(),
+                incident.getIncidentLevel().getLabel(),
                 recLabels
         );
     }
