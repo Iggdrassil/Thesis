@@ -10,6 +10,8 @@ import enums.IncidentRecommendation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,10 +47,18 @@ public class IncidentController {
     // ---------- PAGE VIEW ----------
 
     @GetMapping
-    public String incidentsPage(@RequestParam(defaultValue = "1") int page, Model model) {
+    public String incidentsPage(@RequestParam(defaultValue = "1") int page, Model model,
+                                @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal) {
 
         PageResultDTO<Incident> res = PaginationUtils.paginateList(incidentDAO.getAllIncidents(), page, PAGE_SIZE);
 
+        String role = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)  // вернёт "ROLE_ADMIN", "ROLE_USER" и т.д.
+                .findFirst()
+                .orElse("USER");
+
+        model.addAttribute("role", role);
+        model.addAttribute("currentUser", principal.getUsername());
         model.addAttribute("incidents", res.getContent());
         model.addAttribute("page", res.getPage());
         model.addAttribute("totalPages", res.getTotalPages());
