@@ -1,58 +1,6 @@
 body {
-    margin: 0;
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: url("/web/static/background.gif") no-repeat center center fixed;
-    background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    min-height: 100vh; /* чтобы центрировалось по вертикали */
-    flex-direction: column;
-    position: relative;
     /* место под кнопку добавления */
     padding: 0 0 100px;
-}
-
-.container {
-    background-color: rgba(255, 255, 255, 1);
-    border-radius: 20px;
-    padding: 40px 60px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    max-width: 900px;
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-}
-
-header {
-    display: flex;
-    justify-content: space-between;
-    flex-shrink: 0; /* чтобы не сжимался при нехватке места */
-    align-items: center;
-}
-
-.header-buttons {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.icon-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.icon-button:hover {
-    transform: scale(1.1);
-}
-
-.icon-button img {
-    width: 28px;
-    height: 28px;
 }
 
 /* SETTINGS CARD */

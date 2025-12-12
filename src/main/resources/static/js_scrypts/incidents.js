@@ -56,12 +56,6 @@ let editSelectedRecommendations = [];
 
 let selectedRecommendations = [];
 
-if (role === 'ROLE_USER' || role === 'ROLE_AUDITOR') {
-    addIncidentBtn.style.display = 'none';
-    document.querySelectorAll('.edit-btn').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.delete-btn').forEach(el => el.style.display = 'none');
-}
-
 // --- события открытия/закрытия ---
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -623,7 +617,28 @@ function renderIncidents(incidents) {
         item.className = "incident-item";
         item.setAttribute("data-id", incident.id);
 
-        item.innerHTML = `
+        if (role === 'ROLE_USER' || role === 'ROLE_AUDITOR') {
+            addIncidentBtn.style.display = 'none';
+            item.innerHTML = `
+            <div class="incident-info">
+                <strong>${incident.title}</strong>
+                <span>${incident.description ?? ""}</span>
+            </div>
+            <div class="incident-meta1">
+                <span>${creationDate}</span>
+                <span class="incident-level ${incident.level?.toLowerCase() ?? ""}">
+                    ${incident.levelLocalized ?? ""}
+                </span>
+            </div>
+            <div class="incident-meta2">
+                <div class="incident-cat" data-full-text="${incident.categoryLocalized ?? ""}">
+                    <span class="cat-text">${incident.categoryLocalized ?? ""}</span>
+                </div>
+            </div>
+            </div>
+        `;
+        } else {
+            item.innerHTML = `
             <div class="incident-info">
                 <strong>${incident.title}</strong>
                 <span>${incident.description ?? ""}</span>
@@ -648,6 +663,7 @@ function renderIncidents(incidents) {
                 </button>
             </div>
         `;
+        }
         incidentList.appendChild(item);
     });
 }

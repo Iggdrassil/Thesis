@@ -1,29 +1,4 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: url("/web/static/background.gif") no-repeat center center fixed;
-    background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-/* ↑ параметр, который отвечает за "высоту" меню — увеличь padding ↓ */
-.main-container {
-    background-color: rgba(255, 255, 255, 1);
-    border-radius: 20px;
-    padding: 60px 60px; /* ← здесь можно увеличить первое значение (например, с 40 до 60) */
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    max-width: 900px;
-    width: 90%;
-}
-
 .menu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 30px;
 }
 
@@ -37,27 +12,6 @@ body {
     margin: 0;
     font-size: 14px;
     color: #777;
-}
-
-.menu-buttons {
-    display: flex;
-    gap: 12px;
-}
-
-.icon-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.icon-button img {
-    width: 28px;
-    height: 28px;
-}
-
-.icon-button:hover {
-    transform: scale(1.1);
 }
 
 .menu-grid {
