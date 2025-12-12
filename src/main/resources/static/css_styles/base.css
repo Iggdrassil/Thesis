@@ -77,3 +77,26 @@ header, .settings-header {
     background: #222;
     color: white;
 }
+
+/* Кнопки модалки */
+/* кнопки модалки */
+.modal-actions {
+    display:flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.modal-actions button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #bfbfbf;
+    background: #f6f6f6;
+    cursor: pointer;
+}
+
+.modal-actions .danger {
+    background: #222;
+    color: #fff;
+    border: none;
+}
