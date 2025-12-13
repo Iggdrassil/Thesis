@@ -233,10 +233,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    document.getElementById("closeErrorBtn").addEventListener("click", () => {
-        document.getElementById("errorModal").style.display = "none";
-    });
-
     // ------------------------------
     // 7. Старт
     // ------------------------------

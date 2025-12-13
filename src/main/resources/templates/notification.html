@@ -102,24 +102,24 @@
 </div>
 
 <!-- MODALS -->
-<div class="modal" id="levelsModal">
-    <div class="modal-content">
+<div class="modal-overlay" id="levelsModal">
+    <div class="modal-window">
         <h3>Выберите уровни важности о которых оповещать</h3>
         <div id="levelsList"></div>
-        <div class="modal-btns">
+        <div class="modal-actions">
             <button id="cancelLevelsBtn">Отмена</button>
-            <button id="saveLevelsBtn" class="primary">Сохранить</button>
+            <button id="saveLevelsBtn" class="danger">Сохранить</button>
         </div>
     </div>
 </div>
 
-<div class="modal" id="categoriesModal">
-    <div class="modal-content">
+<div class="modal-overlay" id="categoriesModal">
+    <div class="modal-window">
         <h3>Выберите категории инцидентов о которых оповещать</h3>
         <div id="categoriesList"></div>
-        <div class="modal-btns">
+        <div class="modal-actions">
             <button id="cancelCategoriesBtn">Отмена</button>
-            <button id="saveCategoriesBtn" class="primary">Сохранить</button>
+            <button id="saveCategoriesBtn" class="danger">Сохранить</button>
         </div>
     </div>
 </div>
@@ -128,7 +128,7 @@
 <div id="errorModal" class="modal-overlay">
     <div class="error-window modal-actions modal-window">
         <h2>Ошибка!</h2>
-        <p id="errorMessage"></p>
+        <p id="modal-actions"></p>
         <button class="danger" id="closeErrorModal">Закрыть</button>
     </div>
 </div>
