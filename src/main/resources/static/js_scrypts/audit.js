@@ -26,17 +26,21 @@ function renderList(records) {
 
     empty.classList.add("hidden");
 
-    records.forEach(r => {
+    records.forEach(record => {
         const div = document.createElement("div");
         div.className = "audit-item";
 
+        const creationDate = record.creationDatetime
+            ? record.creationDatetime.replace('T', ' ').split('.')[0] // <--- форматирование даты
+            : "";
+
         div.innerHTML = `
             <div class="audit-info">
-                <strong>${r.title}</strong>
-                <span>${r.description}</span>
+                <strong>${record.title}</strong>
+                <span>${record.description}</span>
             </div>
-            <span>${r.username}</span>
-            <span>${r.creationDatetime}</span>
+            <span>${record.username}</span>
+            <span>${creationDate}</span>
         `;
 
         list.appendChild(div);
