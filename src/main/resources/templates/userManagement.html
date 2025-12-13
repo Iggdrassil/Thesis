@@ -95,22 +95,30 @@
     </div>
 </div>
 
-
-<!-- Модальное окно ошибки -->
-<div id="errorModal" class="modal-overlay">
-    <div class="modal-window error-window">
-        <h2>Ошибка!</h2>
-        <p id="errorMessage">Пользователь уже существует</p>
-        <button id="closeErrorModal">Закрыть</button>
-    </div>
-</div>
-
 <!-- Модальное окно ошибки удаления -->
 <div id="deleteErrorModal" class="modal-overlay">
     <div class="modal-window error-window">
         <h2>Ошибка!</h2>
         <p id="deleteMessage">Нельзя удалить самого себя</p>
-        <button id="deleteCloseErrorModal">Закрыть</button>
+        <button class="danger" id="deleteCloseErrorModal">Закрыть</button>
+    </div>
+</div>
+
+<!-- Модальное окно ошибки -->
+<div id="errorModal" class="modal-overlay">
+    <div class="error-window modal-actions modal-window">
+        <h2>Ошибка!</h2>
+        <p id="errorMessage"></p>
+        <button class="danger" id="closeErrorModal">Закрыть</button>
+    </div>
+</div>
+
+<!-- Модальное окно успеха -->
+<div id="successModal" class="modal-overlay">
+    <div class="success-window modal-actions modal-window">
+        <h2>Успех!</h2>
+        <p id="successMessage"></p>
+        <button class="danger" id="closeSuccessModal">Закрыть</button>
     </div>
 </div>
 

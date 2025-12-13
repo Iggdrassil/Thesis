@@ -127,9 +127,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
             const msg = await resp.text();
             if (resp.ok) {
-                showSuccessModal(msg || "Тестовое письмо отправлено");
+                showSuccessModal("Тестовое письмо успешно отправлено");
             } else {
-                showErrorModal(msg || "Ошибка отправки письма");
+                showErrorModal("Ошибка отправки письма");
             }
         } catch (e) {
             showErrorModal("Ошибка соединения с сервером");
@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.getElementById("cancelLevelsBtn").onclick = () => levelsModal.style.display = "none";
 
         } catch (e) {
-            showErrorModal(e.message);
+            showErrorModal("Не удалось загрузить уровни");
         }
     });
 
@@ -229,21 +229,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.getElementById("cancelCategoriesBtn").onclick = () => categoriesModal.style.display = "none";
 
         } catch (e) {
-            showErrorModal(e.message);
+            showErrorModal("Не удалось загрузить категории");
         }
     });
-
-    // ------------------------------
-    // 6. Модалки ошибок и успеха
-    // ------------------------------
-    function showErrorModal(msg) {
-        document.getElementById("errorText").innerText = msg;
-        document.getElementById("errorModal").style.display = "flex";
-    }
-
-    function showSuccessModal(msg) {
-        alert(msg); // Можно заменить на отдельную модалку
-    }
 
     document.getElementById("closeErrorBtn").addEventListener("click", () => {
         document.getElementById("errorModal").style.display = "none";
@@ -281,4 +269,28 @@ logoutButton.addEventListener('click', () => {
         })
             .then(() => window.location.href = '/login?logout=true');
     }
+});
+
+// Ошибка — показать
+function showErrorModal(message) {
+    let errorMessage = document.getElementById("errorMessage");
+    errorMessage.textContent = message;
+    errorModal.style.display = "flex";
+}
+
+// Ошибка — закрыть
+closeErrorModal.addEventListener("click", () => {
+    errorModal.style.display = "none";
+});
+
+// Успех — показать
+function showSuccessModal(message) {
+    let successMessage = document.getElementById("successMessage");
+    successMessage.textContent = message;
+    successModal.style.display = "flex";
+}
+
+// Успех — закрыть
+closeSuccessModal.addEventListener("click", () => {
+    successModal.style.display = "none";
 });

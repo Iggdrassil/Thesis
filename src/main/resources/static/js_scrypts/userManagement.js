@@ -1,5 +1,6 @@
 const errorModal = document.getElementById("errorModal");
 const closeErrorModal = document.getElementById("closeErrorModal");
+const closeSuccessModal = document.getElementById("closeSuccessModal");
 const errorMessage = document.getElementById("errorMessage");
 const userList = document.getElementById("userList");
 const pagination = document.getElementById("pagination");
@@ -88,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (response.ok) {
+                showSuccessModal("Пользователь успешно создан");
                 addUserModal.style.display = "none";
                 addUserForm.reset();
                 createUserBtn.disabled = true;
@@ -182,6 +184,7 @@ async function editUser(username) {
             });
 
             if (response.ok) {
+                showSuccessModal("Пользователь успешно отредактирован");
                 editModal.style.display = "none";
                 await render(1);
             }
@@ -235,16 +238,17 @@ function deleteUser(username) {
 
             if (response.ok) {
                 confirmDeleteModal.style.display = "none";
+                showSuccessModal("Пользователь успешно удален");
                 await render(1); // <-- заново отрисовываем первую страницу
             } else if (response.status === 403) {
                 showErrorModal("Нельзя удалить самого себя");
             } else if (response.status === 404) {
-                alert("Пользователь не найден");
+                showErrorModal("Пользователь не найден");
             } else {
-                alert("Ошибка при удалении пользователя");
+                showErrorModal("Ошибка при удалении пользователя");
             }
         } catch (err) {
-            alert("Ошибка соединения с сервером");
+            showErrorModal("Ошибка соединения с сервером");
         }
     });
 
@@ -402,4 +406,16 @@ async function loadUser(username) {
     if (!resp.ok) return null;
     return await resp.json();
 }
+
+// Успех — показать
+function showSuccessModal(message) {
+    let successMessage = document.getElementById("successMessage");
+    successMessage.textContent = message;
+    successModal.style.display = "flex";
+}
+
+// Ошибка — закрыть
+closeSuccessModal.addEventListener("click", () => {
+    successModal.style.display = "none";
+});
 

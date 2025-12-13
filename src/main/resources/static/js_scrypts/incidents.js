@@ -8,6 +8,8 @@ const recsDoneBtn = document.getElementById("recsDoneBtn");
 const cancelIncidentBtn = document.getElementById("cancelIncidentBtn");
 const backButton = document.getElementById("backButton");
 const logoutButton = document.getElementById("logoutButton");
+const successModal = document.getElementById("successModal");
+const closeSuccessModal = document.getElementById("closeSuccessModal");
 
 const createButton = document.getElementById("createIncidentBtn");
 const titleInput = document.getElementById("incidentTitle");
@@ -212,25 +214,25 @@ async function submitCreateIncident(){
             credentials: "same-origin"
         });
 
-        if(resp.status === 409){
-            // показать модальное сообщение об ошибке (или alert)
-            alert("Инцидент с таким названием уже существует");
+        if(resp.status === 400){
+            // показать модальное сообщение об ошибке
+            showErrorModal("Инцидент с таким названием уже существует");
             return;
         }
         if(!resp.ok){
-            alert("Ошибка при создании инцидента");
+            showErrorModal("Ошибка при создании инцидента");
             return;
         }
 
         // сброс выбранных рекомендаций **непосредственно после успешного создания**
         selectedRecommendations = [];
-
+        showSuccessModal("Инцидент успешно создан");
         closeIncidentModal();
         await loadIncidents(currentIncidentPage);
 
     } catch(e){
         console.error(e);
-        alert("Ошибка сети");
+        showErrorModal("Ошибка сети");
     }
 }
 
@@ -311,7 +313,7 @@ async function viewIncident(id) {
     try {
         const resp = await fetch(`/incidents/${id}`);
         if (!resp.ok) {
-            alert("Не удалось загрузить инцидент");
+            showErrorModal("Не удалось загрузить инцидент");
             return;
         }
 
@@ -330,7 +332,7 @@ async function viewIncident(id) {
 
     } catch (e) {
         console.error(e);
-        alert("Ошибка сети");
+        showErrorModal("Ошибка сети");
     }
 }
 
@@ -431,7 +433,7 @@ async function openEditIncident(id) {
 
         const resp = await fetch(`/incidents/${id}`);
         if (!resp.ok) {
-            alert("Не удалось загрузить данные инцидента");
+            showErrorModal("Не удалось загрузить данные инцидента");
             return;
         }
 
@@ -459,7 +461,7 @@ async function openEditIncident(id) {
 
     } catch (e) {
         console.error(e);
-        alert("Ошибка сети");
+        showErrorModal("Ошибка сети");
     }
 }
 
@@ -494,16 +496,16 @@ async function submitEditIncident() {
         });
 
         if (!resp.ok) {
-            alert("Не удалось сохранить изменения");
+            showErrorModal("Не удалось сохранить изменения");
             return;
         }
-
+        showSuccessModal("Инцидент успешно отредактирован");
         closeEditIncidentModal();
         await loadIncidents(currentIncidentPage);
 
     } catch (e) {
         console.error(e);
-        alert("Ошибка сети");
+        showErrorModal("Ошибка сети");
     }
 }
 
@@ -536,6 +538,7 @@ document.getElementById("confirmDeleteBtn").addEventListener("click", async () =
         });
 
         if (response.ok) {
+            showSuccessModal("Инцидент успешно удален");
             // Успешно удалено
             document.getElementById("deleteIncidentModal").style.display = "none";
             currentDeleteId = null;
@@ -551,12 +554,12 @@ document.getElementById("confirmDeleteBtn").addEventListener("click", async () =
 
             await loadIncidents(currentIncidentPage); // обновляем список
         } else if (response.status === 404) {
-            alert("Инцидент не найден");
+            showErrorModal("Инцидент не найден");
         } else {
-            alert("Ошибка при удалении инцидента");
+            showErrorModal("Ошибка при удалении инцидента");
         }
     } catch (err) {
-        alert("Ошибка соединения с сервером");
+        showErrorModal("Ошибка соединения с сервером");
     }
 });
 
@@ -739,6 +742,30 @@ function pageBtn(text, handler) {
 // Загружаем первую страницу при старте
 document.addEventListener("DOMContentLoaded", () => {
     loadIncidents(currentIncidentPage);
+});
+
+// Ошибка — показать
+function showErrorModal(message) {
+    let errorMessage = document.getElementById("errorMessage");
+    errorMessage.textContent = message;
+    errorModal.style.display = "flex";
+}
+
+// Ошибка — закрыть
+closeErrorModal.addEventListener("click", () => {
+    errorModal.style.display = "none";
+});
+
+// Успех — показать
+function showSuccessModal(message) {
+    let successMessage = document.getElementById("successMessage");
+    successMessage.textContent = message;
+    successModal.style.display = "flex";
+}
+
+// Успех — закрыть
+closeSuccessModal.addEventListener("click", () => {
+    successModal.style.display = "none";
 });
 
 
