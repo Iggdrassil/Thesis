@@ -266,9 +266,17 @@ function openViewIncidentModal(incident) {
     else
         incidentShieldIcon.src = "/web/static/icons/lvlLow.png";
 
+    const creationDate = incident.creationDate
+        ? incident.creationDate.replace('T', ' ').split('.')[0] // <--- форматирование даты
+        : "";
+
+    const updatedDate = incident.updatedDate
+        ? incident.updatedDate.replace('T', ' ').split('.')[0] // <--- форматирование даты
+        : "";
+
     // Простые поля
-    incidentCreated.textContent = incident.creationDate;
-    incidentUpdated.textContent = incident.updatedDate ?? "—";
+    incidentCreated.textContent = creationDate;
+    incidentUpdated.textContent = updatedDate ?? "—";
     incidentAuthor.textContent = incident.author;
     incidentDesc.textContent = incident.description ?? "—";
     incidentCategoryView.textContent = incident.categoryLocalized ?? "—";
