@@ -31,7 +31,12 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         // если аккаунт заблокирован
         if (exception instanceof LockedException) {
             long seconds = attemptService.getRemainingSeconds(username);
-            response.sendRedirect("/login?blocked=" + seconds);
+
+            response.setStatus(423); // Locked
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(
+                    "{\"blocked\":true,\"seconds\":" + seconds + "}"
+            );
             return;
         }
 

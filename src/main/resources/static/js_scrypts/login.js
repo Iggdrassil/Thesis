@@ -9,22 +9,56 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector(".login-form");
     const blockedMessage = document.getElementById("blockedMessage");
     const loginButton = document.getElementById("loginButton");
 
-    // Если блокировка активна
-    if (blockedMessage) {
-        // Берём число секунд из параметра ?blocked=N
-        const params = new URLSearchParams(window.location.search);
-        const seconds = parseInt(params.get("blocked"), 10);
+    let unblockTimer = null;
 
-        // Блокируем кнопку
-        loginButton.disabled = true;
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-        // Через N секунд убираем блокировку без перезагрузки
-        setTimeout(() => {
-            blockedMessage.style.display = "none";
-            loginButton.disabled = false;
-        }, seconds * 1000);
-    }
+        blockedMessage.style.display = "none";
+
+        const formData = new FormData(form);
+
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: formData
+        });
+
+        // 🔒 Пользователь заблокирован
+        if (response.status === 423) {
+            const data = await response.json();
+            let seconds = data.seconds;
+
+            blockedMessage.textContent =
+                `Вход заблокирован на ${seconds} секунд`;
+            blockedMessage.style.display = "block";
+            loginButton.disabled = true;
+
+            if (unblockTimer) clearInterval(unblockTimer);
+
+            unblockTimer = setInterval(() => {
+                seconds--;
+
+                if (seconds <= 0) {
+                    blockedMessage.style.display = "none";
+                    loginButton.disabled = false;
+                    clearInterval(unblockTimer);
+                } else {
+                    blockedMessage.textContent =
+                        `Вход заблокирован на ${seconds} секунд`;
+                }
+            }, 1000);
+
+            return;
+        }
+
+        // ❌ обычная ошибка логина → пусть Spring делает redirect
+        if (response.redirected) {
+            window.location.href = response.url;
+        }
+    });
 });
+

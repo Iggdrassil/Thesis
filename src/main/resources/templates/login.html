@@ -24,10 +24,9 @@
         <p th:if="${param.error}" class="error-message">Неверный логин или пароль</p>
         <p th:if="${param.logout}" class="info-message">Вы вышли из системы</p>
     </form>
-    <p th:if="${param.blocked}"
-       id="blockedMessage"
+    <p id="blockedMessage"
        class="error-message"
-       th:text="'Вход заблокирован на ' + ${param.blocked} + ' секунд'">
+       style="display: none;">
     </p>
 
 </div>
