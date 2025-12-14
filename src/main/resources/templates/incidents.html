@@ -62,7 +62,18 @@
             </div>
 
             <div class="incident-meta1">
-                <span>Дата создания</span>
+                <div class="data-header">
+                    <span>Дата создания</span>
+                    <button class="filter-btn" id="dateFilterBtn" title="Фильтр">
+                        <img src="/web/static/icons/filter.png" alt="Фильтр">
+                    </button>
+                    <img id="dateFilterActiveIcon"
+                         src="/web/static/icons/active-filter.png"
+                         alt="Фильтр активирован"
+                         title="Фильтр активирован"
+                         class="filter-active-icon"
+                         style="display:none; cursor:pointer;">
+                </div>
                 <div class="level-header">
                     <span>Уровень</span>
                     <button class="filter-btn" id="levelFilterBtn" title="Фильтр">
@@ -83,6 +94,38 @@
                     <div class="filter-actions">
                         <button id="applyLevelFilter" class="danger">Применить</button>
                         <button id="cancelLevelFilter">Отмена</button>
+                    </div>
+                </div>
+
+                <!-- popup фильтра даты -->
+                <div class="filter-popup" id="dateFilterPopup">
+                    <div class="date-filter-row">
+                        <label>С</label>
+                        <div class="date-input-wrapper">
+                            <input type="text"
+                                   id="dateFromInput"
+                                   placeholder="ДД-ММ-ГГГГ"
+                                   maxlength="10">
+                            <button class="calendar-btn" type="button"></button>
+                            <input type="date" class="native-date" data-target="dateFromInput">
+                        </div>
+                    </div>
+
+                    <div class="date-filter-row">
+                        <label>По</label>
+                        <div class="date-input-wrapper">
+                            <input type="text"
+                                   id="dateToInput"
+                                   placeholder="ДД-ММ-ГГГГ"
+                                   maxlength="10">
+                            <button class="calendar-btn" type="button"></button>
+                            <input type="date" class="native-date" data-target="dateToInput">
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button id="applyDateFilter" class="danger">Применить</button>
+                        <button id="cancelDateFilter">Отмена</button>
                     </div>
                 </div>
             </div>

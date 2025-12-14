@@ -63,6 +63,8 @@ let filteredIncidents = [];  // результат фильтрации
 let currentIncidentPage = 1;
 let selectedCategoryFilters = []; // выбранные категории
 let incidentTextFilter = ""; // текст фильтра по названию
+let dateFromFilter = null; // Date | null
+let dateToFilter = null;
 
 const levelFilterBtn = document.getElementById("levelFilterBtn");
 const levelFilterPopup = document.getElementById("levelFilterPopup");
@@ -77,6 +79,13 @@ const incidentTextFilterPopup = document.getElementById("incidentTextFilterPopup
 const incidentTextFilterInput = document.getElementById("incidentTextFilterInput");
 const applyIncidentTextFilterBtn = document.getElementById("applyIncidentTextFilter");
 const cancelIncidentTextFilterBtn = document.getElementById("cancelIncidentTextFilter");
+const dateFilterBtn = document.getElementById("dateFilterBtn");
+const dateFilterPopup = document.getElementById("dateFilterPopup");
+const dateFromInput = document.getElementById("dateFromInput");
+const dateToInput = document.getElementById("dateToInput");
+const applyDateFilterBtn = document.getElementById("applyDateFilter");
+const cancelDateFilterBtn = document.getElementById("cancelDateFilter");
+
 
 
 // --- события открытия/закрытия ---
@@ -847,6 +856,7 @@ document.addEventListener("click", () => {
     levelFilterPopup.style.display = "none";
     categoryFilterPopup.style.display = "none";
     incidentTextFilterPopup.style.display = "none";
+    dateFilterPopup.style.display = "none";
 });
 
 applyLevelFilterBtn.addEventListener("click", () => {
@@ -883,6 +893,23 @@ function applyFilters() {
         );
     }
 
+    // дата создания
+    if (dateFromFilter || dateToFilter) {
+        filteredIncidents = filteredIncidents.filter(i => {
+            if (!i.creationDate) return false;
+            const d = new Date(i.creationDate);
+
+            if (dateFromFilter && d < dateFromFilter) return false;
+            if (dateToFilter) {
+                const to = new Date(dateToFilter);
+                to.setHours(23, 59, 59, 999);
+                if (d > to) return false;
+            }
+            return true;
+        });
+    }
+
+
     currentIncidentPage = 1;
     renderPage();
     updateFilterIcons();
@@ -915,6 +942,7 @@ function updateFilterIcons() {
     const levelIcon = document.getElementById("levelFilterActiveIcon");
     const categoryIcon = document.getElementById("categoryFilterActiveIcon");
     const incidentIcon = document.getElementById("incidentTextFilterActiveIcon");
+    const dateIcon = document.getElementById("dateFilterActiveIcon");
 
     levelIcon.style.display =
         selectedLevelFilters.length > 0 ? "inline" : "none";
@@ -924,6 +952,10 @@ function updateFilterIcons() {
 
     incidentIcon.style.display =
         incidentTextFilter !== "" ? "inline" : "none";
+
+    dateIcon.style.display =
+        (dateFromFilter || dateToFilter) ? "inline" : "none";
+
 }
 
 
@@ -970,6 +1002,59 @@ applyIncidentTextFilterBtn.addEventListener("click", () => {
     incidentTextFilterPopup.style.display = "none";
     applyFilters();
 });
+
+dateFilterBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dateFilterPopup.style.display =
+        dateFilterPopup.style.display === "block" ? "none" : "block";
+});
+
+dateFilterPopup.addEventListener("click", e => e.stopPropagation());
+
+cancelDateFilterBtn.addEventListener("click", () => {
+    dateFilterPopup.style.display = "none";
+});
+
+function autoFormatDateInput(input) {
+    input.addEventListener("input", () => {
+        let v = input.value.replace(/\D/g, "").slice(0, 8);
+        if (v.length >= 5)
+            v = v.replace(/(\d{2})(\d{2})(\d{1,4})/, "$1-$2-$3");
+        else if (v.length >= 3)
+            v = v.replace(/(\d{2})(\d{1,2})/, "$1-$2");
+        input.value = v;
+    });
+}
+
+autoFormatDateInput(dateFromInput);
+autoFormatDateInput(dateToInput);
+
+document.querySelectorAll(".native-date").forEach(picker => {
+    picker.addEventListener("change", () => {
+        const target = document.getElementById(picker.dataset.target);
+        if (!picker.value) return;
+
+        const [y, m, d] = picker.value.split("-");
+        target.value = `${d}-${m}-${y}`;
+    });
+});
+
+applyDateFilterBtn.addEventListener("click", () => {
+    dateFromFilter = parseDate(dateFromInput.value);
+    dateToFilter = parseDate(dateToInput.value);
+
+    dateFilterPopup.style.display = "none";
+    applyFilters();
+});
+
+function parseDate(str) {
+    if (!str) return null;
+    const [d, m, y] = str.split("-").map(Number);
+    if (!d || !m || !y) return null;
+    return new Date(y, m - 1, d, 0, 0, 0);
+}
+
+
 
 
 
