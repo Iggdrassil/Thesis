@@ -62,6 +62,7 @@ let allIncidents = [];       // все инциденты, загруженны�
 let filteredIncidents = [];  // результат фильтрации
 let currentIncidentPage = 1;
 let selectedCategoryFilters = []; // выбранные категории
+let incidentTextFilter = ""; // текст фильтра по названию
 
 const levelFilterBtn = document.getElementById("levelFilterBtn");
 const levelFilterPopup = document.getElementById("levelFilterPopup");
@@ -71,6 +72,12 @@ const categoryFilterBtn = document.getElementById("categoryFilterBtn");
 const categoryFilterPopup = document.getElementById("categoryFilterPopup");
 const applyCategoryFilterBtn = document.getElementById("applyCategoryFilter");
 const cancelCategoryFilterBtn = document.getElementById("cancelCategoryFilter");
+const incidentTextFilterBtn = document.getElementById("incidentTextFilterBtn");
+const incidentTextFilterPopup = document.getElementById("incidentTextFilterPopup");
+const incidentTextFilterInput = document.getElementById("incidentTextFilterInput");
+const applyIncidentTextFilterBtn = document.getElementById("applyIncidentTextFilter");
+const cancelIncidentTextFilterBtn = document.getElementById("cancelIncidentTextFilter");
+
 
 // --- события открытия/закрытия ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -838,6 +845,8 @@ cancelLevelFilterBtn.addEventListener("click", () => {
 // закрытие по клику вне
 document.addEventListener("click", () => {
     levelFilterPopup.style.display = "none";
+    categoryFilterPopup.style.display = "none";
+    incidentTextFilterPopup.style.display = "none";
 });
 
 applyLevelFilterBtn.addEventListener("click", () => {
@@ -852,17 +861,25 @@ applyLevelFilterBtn.addEventListener("click", () => {
 function applyFilters() {
     filteredIncidents = [...allIncidents];
 
-    // фильтр по уровню
+    // уровень
     if (selectedLevelFilters.length > 0) {
         filteredIncidents = filteredIncidents.filter(i =>
             selectedLevelFilters.includes(i.level)
         );
     }
 
-    // фильтр по категории
+    // категория
     if (selectedCategoryFilters.length > 0) {
         filteredIncidents = filteredIncidents.filter(i =>
             selectedCategoryFilters.includes(i.category)
+        );
+    }
+
+    // название инцидента (регистронезависимо)
+    if (incidentTextFilter !== "") {
+        const q = incidentTextFilter.toLowerCase();
+        filteredIncidents = filteredIncidents.filter(i =>
+            i.title?.toLowerCase().includes(q)
         );
     }
 
@@ -897,13 +914,18 @@ function changePage(page) {
 function updateFilterIcons() {
     const levelIcon = document.getElementById("levelFilterActiveIcon");
     const categoryIcon = document.getElementById("categoryFilterActiveIcon");
+    const incidentIcon = document.getElementById("incidentTextFilterActiveIcon");
 
     levelIcon.style.display =
         selectedLevelFilters.length > 0 ? "inline" : "none";
 
     categoryIcon.style.display =
         selectedCategoryFilters.length > 0 ? "inline" : "none";
+
+    incidentIcon.style.display =
+        incidentTextFilter !== "" ? "inline" : "none";
 }
+
 
 categoryFilterBtn.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -927,6 +949,29 @@ applyCategoryFilterBtn.addEventListener("click", () => {
     categoryFilterPopup.style.display = "none";
     applyFilters();
 });
+
+incidentTextFilterBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    incidentTextFilterPopup.style.display =
+        incidentTextFilterPopup.style.display === "block" ? "none" : "block";
+});
+
+incidentTextFilterPopup.addEventListener("click", (e) => {
+    e.stopPropagation();
+});
+
+cancelIncidentTextFilterBtn.addEventListener("click", () => {
+    incidentTextFilterPopup.style.display = "none";
+});
+
+applyIncidentTextFilterBtn.addEventListener("click", () => {
+    incidentTextFilter = incidentTextFilterInput.value.trim();
+
+    incidentTextFilterPopup.style.display = "none";
+    applyFilters();
+});
+
+
 
 
 

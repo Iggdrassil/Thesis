@@ -33,8 +33,32 @@
         <!-- ШАПКА ТАБЛИЦЫ -->
         <div class="incident-header">
             <div class="incident-info">
-                <strong>Инцидент</strong>
+                <div class="level-header" style="justify-content:flex-start">
+                    <strong>Инцидент</strong>
+                    <button class="filter-btn" id="incidentTextFilterBtn" title="Фильтр">
+                        <img src="/web/static/icons/filter.png" alt="Фильтр">
+                    </button>
+                    <img id="incidentTextFilterActiveIcon"
+                         src="/web/static/icons/active-filter.png"
+                         alt="Фильтр активирован"
+                         title="Фильтр активирован"
+                         class="filter-active-icon"
+                         style="display:none; cursor:pointer;">
+                </div>
                 <span>Описание</span>
+
+                <!-- popup текстового фильтра -->
+                <div class="filter-popup" id="incidentTextFilterPopup">
+                    <input type="text"
+                           id="incidentTextFilterInput"
+                           placeholder="Введите название…"
+                           class="text-filter-input">
+
+                    <div class="filter-actions">
+                        <button id="applyIncidentTextFilter" class="danger">Применить</button>
+                        <button id="cancelIncidentTextFilter">Отмена</button>
+                    </div>
+                </div>
             </div>
 
             <div class="incident-meta1">
