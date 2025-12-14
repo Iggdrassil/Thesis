@@ -64,8 +64,32 @@
             </div>
 
             <div class="incident-meta2">
-                <span>Категория</span>
+                <div class="level-header">
+                    <span>Категория</span>
+                    <button class="filter-btn" id="categoryFilterBtn" title="Фильтр">
+                        <img src="/web/static/icons/filter.png" alt="Фильтр">
+                    </button>
+                    <img id="categoryFilterActiveIcon"
+                         src="/web/static/icons/active-filter.png"
+                         alt="Фильтр активирован"
+                         title="Фильтр активирован"
+                         class="filter-active-icon"
+                         style="display:none; cursor:pointer;">
+                </div>
+
+                <!-- popup фильтра категории -->
+                <div class="filter-popup" id="categoryFilterPopup">
+                    <div class="filter-options" id="categoryFilterOptions">
+                        <!-- чекбоксы подгрузятся из /incidents/categories -->
+                    </div>
+
+                    <div class="filter-actions">
+                        <button id="applyCategoryFilter" class="danger">Применить</button>
+                        <button id="cancelCategoryFilter">Отмена</button>
+                    </div>
+                </div>
             </div>
+
 
             <div class="incident-actions">
                 <span>Действия</span>

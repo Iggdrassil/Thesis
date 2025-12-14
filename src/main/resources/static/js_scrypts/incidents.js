@@ -61,11 +61,16 @@ let allLoadedIncidents = [];       // все инциденты текущей �
 let allIncidents = [];       // все инциденты, загруженные с сервера
 let filteredIncidents = [];  // результат фильтрации
 let currentIncidentPage = 1;
+let selectedCategoryFilters = []; // выбранные категории
 
 const levelFilterBtn = document.getElementById("levelFilterBtn");
 const levelFilterPopup = document.getElementById("levelFilterPopup");
 const applyLevelFilterBtn = document.getElementById("applyLevelFilter");
 const cancelLevelFilterBtn = document.getElementById("cancelLevelFilter");
+const categoryFilterBtn = document.getElementById("categoryFilterBtn");
+const categoryFilterPopup = document.getElementById("categoryFilterPopup");
+const applyCategoryFilterBtn = document.getElementById("applyCategoryFilter");
+const cancelCategoryFilterBtn = document.getElementById("cancelCategoryFilter");
 
 // --- события открытия/закрытия ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -193,6 +198,23 @@ async function loadDictionaries() {
         </label>
     `);
         });
+
+        // категории для фильтра
+        const categoryFilterOptions = document.getElementById("categoryFilterOptions");
+        categoryFilterOptions.innerHTML = "";
+
+        categories.forEach(c => {
+            const val = c.value ?? c.name ?? c;
+            const label = c.label ?? c.localizedValue ?? c.name ?? c;
+
+            categoryFilterOptions.insertAdjacentHTML("beforeend", `
+        <label>
+            <input type="checkbox" value="${val}">
+            <span>${label}</span>
+        </label>
+    `);
+        });
+
 
 
     } catch (err) {
@@ -830,15 +852,23 @@ applyLevelFilterBtn.addEventListener("click", () => {
 function applyFilters() {
     filteredIncidents = [...allIncidents];
 
+    // фильтр по уровню
     if (selectedLevelFilters.length > 0) {
         filteredIncidents = filteredIncidents.filter(i =>
             selectedLevelFilters.includes(i.level)
         );
     }
 
-    currentIncidentPage = 1;  // сброс на первую страницу при новом фильтре
+    // фильтр по категории
+    if (selectedCategoryFilters.length > 0) {
+        filteredIncidents = filteredIncidents.filter(i =>
+            selectedCategoryFilters.includes(i.category)
+        );
+    }
+
+    currentIncidentPage = 1;
     renderPage();
-    updateFilterIcon();
+    updateFilterIcons();
 }
 
 function renderPage() {
@@ -864,14 +894,40 @@ function changePage(page) {
     renderPage();
 }
 
-function updateFilterIcon() {
-    const icon = document.getElementById("levelFilterActiveIcon");
-    if (selectedLevelFilters.length > 0) {
-        icon.style.display = "inline";
-    } else {
-        icon.style.display = "none";
-    }
+function updateFilterIcons() {
+    const levelIcon = document.getElementById("levelFilterActiveIcon");
+    const categoryIcon = document.getElementById("categoryFilterActiveIcon");
+
+    levelIcon.style.display =
+        selectedLevelFilters.length > 0 ? "inline" : "none";
+
+    categoryIcon.style.display =
+        selectedCategoryFilters.length > 0 ? "inline" : "none";
 }
+
+categoryFilterBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    categoryFilterPopup.style.display =
+        categoryFilterPopup.style.display === "block" ? "none" : "block";
+});
+
+categoryFilterPopup.addEventListener("click", (e) => {
+    e.stopPropagation();
+});
+
+cancelCategoryFilterBtn.addEventListener("click", () => {
+    categoryFilterPopup.style.display = "none";
+});
+
+applyCategoryFilterBtn.addEventListener("click", () => {
+    selectedCategoryFilters =
+        Array.from(categoryFilterPopup.querySelectorAll("input[type='checkbox']:checked"))
+            .map(cb => cb.value);
+
+    categoryFilterPopup.style.display = "none";
+    applyFilters();
+});
+
 
 
 
