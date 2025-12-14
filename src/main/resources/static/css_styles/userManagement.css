@@ -11,9 +11,9 @@
     flex-direction: column;
 
     flex: 1;
-    width: 95%;
+    width: 100%;
     min-height: 400px; /* фиксируем минимальную высоту */
-    max-height: 450px; /* чтобы не росла при добавлении пользователей */
+    max-height: 500px; /* чтобы не росла при добавлении пользователей */
     overflow: hidden; /* чтобы не появлялся внутренний скролл */
     justify-content: space-between;
     transition: height 0.3s ease;
@@ -22,7 +22,7 @@
 /* контейнер со списком пользователей */
 .user-list {
     flex: 1;
-    overflow-y: auto;
+    /*overflow-y: auto;*/
     display: flex;
     flex-direction: column;
     justify-content: flex-start; /* пользователи сверху */
@@ -32,17 +32,36 @@
     margin-top: 0;
 }
 
-.user-item {
+/*.user-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #ddd;
     padding: 10px 0;
+}*/
+
+.user-item {
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+
+    /*display: grid;*/
+    /*grid-template-columns: 1fr 100px;*/
+  /*  align-items: center;*/
+
+    border-bottom: 1px solid #ddd;
+    /*padding: 12px 0;*/
+    gap: 10px;
+
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    align-items: center;
+    padding: 12px 10px;   /* небольшой контролируемый отступ */
 }
 
 .user-info {
     display: flex;
     flex-direction: column;
+    text-align: left;
 }
 
 .user-actions {
@@ -120,3 +139,56 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* ===== ШАПКА ТАБЛИЦЫ ПОЛЬЗОВАТЕЛЕЙ ===== */
+
+.user-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    background: #f3f4f6;
+    border-bottom: 2px solid #d1d5db;
+
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+
+    text-align: center;
+
+    border-bottom: 2px solid #d1d5db;
+
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+/* Совпадение колонок с .user-item */
+.user-header .user-info,
+.user-item .user-info {
+    flex: 1;
+}
+
+.user-header .user-actions,
+.user-item .user-actions {
+    width: auto;
+    min-width: 120px;
+    justify-content: center;
+}
+
+/* выравнивание текста */
+.user-header .user-info {
+    padding-left: 10px;
+    text-align: left;
+}
+
+.user-header .user-actions {
+    padding-right: 10px;
+    text-align: center;
+}
+
+.user-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+
