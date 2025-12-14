@@ -164,3 +164,55 @@ header, .settings-header {
     gap: 1rem;
     /*text-align: left;*/
 }
+
+.filter-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.filter-btn img {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+.filter-btn:hover img {
+    opacity: 1;
+}
+
+/* popup */
+.filter-popup {
+    position: absolute;
+    top: 100%;
+    margin-top: 6px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px;
+    width: 180px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    z-index: 2000;
+    display: none;
+}
+
+.filter-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.filter-active-icon {
+    width: 20px;          /* размер иконки */
+    height: 20px;
+    vertical-align: middle;
+}
+
+.filter-actions .danger {
+    border-radius: 4px;
+    background: #222;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}

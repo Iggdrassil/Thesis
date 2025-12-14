@@ -30,6 +30,49 @@
     <div class="incident-card">
         <h3>Заведенные в системе инциденты информационной безопасности</h3>
 
+        <!-- ШАПКА ТАБЛИЦЫ -->
+        <div class="incident-header">
+            <div class="incident-info">
+                <strong>Инцидент</strong>
+                <span>Описание</span>
+            </div>
+
+            <div class="incident-meta1">
+                <span>Дата создания</span>
+                <div class="level-header">
+                    <span>Уровень</span>
+                    <button class="filter-btn" id="levelFilterBtn" title="Фильтр">
+                        <img src="/web/static/icons/filter.png" alt="Фильтр">
+                    </button>
+                    <img id="levelFilterActiveIcon" src="/web/static/icons/active-filter.png"
+                         alt="Фильтр активирован"
+                         title="Фильтр активирован"
+                         class="filter-active-icon" style="display:none; cursor:pointer;">
+                </div>
+
+                <!-- Выпадающее окно фильтра -->
+                <div class="filter-popup" id="levelFilterPopup">
+                    <div class="filter-options" id="levelFilterOptions">
+                        <!-- чекбоксы подгрузятся из /incidents/levels -->
+                    </div>
+
+                    <div class="filter-actions">
+                        <button id="applyLevelFilter" class="danger">Применить</button>
+                        <button id="cancelLevelFilter">Отмена</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="incident-meta2">
+                <span>Категория</span>
+            </div>
+
+            <div class="incident-actions">
+                <span>Действия</span>
+            </div>
+        </div>
+
+
         <!-- Список инцидентов -->
         <div class="incident-list" id="incidentList" th:if="${!#lists.isEmpty(incidents)}">
             <div class="incident-item"

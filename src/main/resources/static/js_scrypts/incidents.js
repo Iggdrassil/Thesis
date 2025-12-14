@@ -55,8 +55,17 @@ const role = document.body.dataset.role; // Thymeleaf вставит значе�
 let editIncidentId = null;
 let currentDeleteId = null;
 let editSelectedRecommendations = [];
-
 let selectedRecommendations = [];
+let selectedLevelFilters = [];     // выбранные уровни
+let allLoadedIncidents = [];       // все инциденты текущей страницы
+let allIncidents = [];       // все инциденты, загруженные с сервера
+let filteredIncidents = [];  // результат фильтрации
+let currentIncidentPage = 1;
+
+const levelFilterBtn = document.getElementById("levelFilterBtn");
+const levelFilterPopup = document.getElementById("levelFilterPopup");
+const applyLevelFilterBtn = document.getElementById("applyLevelFilter");
+const cancelLevelFilterBtn = document.getElementById("cancelLevelFilter");
 
 // --- события открытия/закрытия ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -84,9 +93,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // --- открытие/закрытие модалок ---
-function openIncidentModal(){
+function openIncidentModal() {
     modal.style.display = "flex";
-    modal.setAttribute("aria-hidden","false");
+    modal.setAttribute("aria-hidden", "false");
 
     // Сброс формы
     titleInput.value = "";
@@ -103,9 +112,10 @@ function openIncidentModal(){
     // Переключаем кнопку создания
     validateForm();
 }
-function closeIncidentModal(){
+
+function closeIncidentModal() {
     modal.style.display = "none";
-    modal.setAttribute("aria-hidden","true");
+    modal.setAttribute("aria-hidden", "true");
     // сброс формы
     titleInput.value = "";
     descInput.value = "";
@@ -116,17 +126,18 @@ function closeIncidentModal(){
     validateForm();
 }
 
-function openRecsModal(){
+function openRecsModal() {
     recsModal.style.display = "flex";
-    recsModal.setAttribute("aria-hidden","false");
+    recsModal.setAttribute("aria-hidden", "false");
 }
-function closeRecsModal(){
+
+function closeRecsModal() {
     recsModal.style.display = "none";
-    recsModal.setAttribute("aria-hidden","true");
+    recsModal.setAttribute("aria-hidden", "true");
 }
 
 // --- загрузка словарей из бекенда ---
-async function loadDictionaries(){
+async function loadDictionaries() {
     try {
         // категории
         const catResp = await fetch("/incidents/categories");
@@ -167,16 +178,33 @@ async function loadDictionaries(){
             `);
         });
 
+        // уровни для фильтра
+        const levelFilterOptions = document.getElementById("levelFilterOptions");
+        levelFilterOptions.innerHTML = "";
+
+        levels.forEach(l => {
+            const val = l.value ?? l.name;
+            const label = l.label ?? l.localizedValue ?? val;
+
+            levelFilterOptions.insertAdjacentHTML("beforeend", `
+        <label>
+            <input type="checkbox" value="${val}">
+            <span>${label}</span>
+        </label>
+    `);
+        });
+
+
     } catch (err) {
         console.error("Ошибка загрузки справочников:", err);
     }
 }
 
 // утилита для чекбоксов (вызывается из onChange)
-function toggleRecommendationCb(cb){
+function toggleRecommendationCb(cb) {
     const v = cb.value;
-    if(cb.checked){
-        if(!selectedRecommendations.includes(v)) selectedRecommendations.push(v);
+    if (cb.checked) {
+        if (!selectedRecommendations.includes(v)) selectedRecommendations.push(v);
     } else {
         selectedRecommendations = selectedRecommendations.filter(x => x !== v);
     }
@@ -184,14 +212,14 @@ function toggleRecommendationCb(cb){
 }
 
 // --- валидация формы ---
-function validateForm(){
+function validateForm() {
     const ok = titleInput.value.trim() !== "" && categorySelect.value !== "" && levelSelect.value !== "";
     createButton.disabled = !ok;
 }
 
 // --- отправка запроса создания ---
-async function submitCreateIncident(){
-    if(createButton.disabled) return;
+async function submitCreateIncident() {
+    if (createButton.disabled) return;
 
     const body = {
         title: titleInput.value.trim(),
@@ -214,12 +242,12 @@ async function submitCreateIncident(){
             credentials: "same-origin"
         });
 
-        if(resp.status === 400){
+        if (resp.status === 400) {
             // показать модальное сообщение об ошибке
             showErrorModal("Инцидент с таким названием уже существует");
             return;
         }
-        if(!resp.ok){
+        if (!resp.ok) {
             showErrorModal("Ошибка при создании инцидента");
             return;
         }
@@ -230,7 +258,7 @@ async function submitCreateIncident(){
         closeIncidentModal();
         await loadIncidents(currentIncidentPage);
 
-    } catch(e){
+    } catch (e) {
         console.error(e);
         showErrorModal("Ошибка сети");
     }
@@ -541,7 +569,7 @@ document.getElementById("confirmDeleteBtn").addEventListener("click", async () =
     try {
         const response = await fetch(`/incidents/delete/${currentDeleteId}`, {
             method: "DELETE",
-            headers: { [header]: token },
+            headers: {[header]: token},
             credentials: "same-origin"
         });
 
@@ -572,19 +600,17 @@ document.getElementById("confirmDeleteBtn").addEventListener("click", async () =
 });
 
 // --- ПАГИНАЦИЯ ---
-
-let currentIncidentPage = 1; // текущая страница
-
 // Загрузка и рендер инцидентов
 async function loadIncidents(page = 1) {
     try {
-        const resp = await fetch(`/incidents/list?page=${page}`);
+        const resp = await fetch(`/incidents/list`); // убираем page
         if (!resp.ok) throw new Error("Ошибка при загрузке инцидентов");
         const data = await resp.json();
 
+        allIncidents = data;       // сохраняем все данные
         currentIncidentPage = page;
-        renderIncidents(data);
-        renderIncidentPagination(page, Math.ceil(await getTotalIncidents() / PAGE_SIZE));
+
+        applyFilters();            // обновляем filteredIncidents и рендерим
     } catch (e) {
         console.error(e);
         incidentList.innerHTML = "";
@@ -592,6 +618,7 @@ async function loadIncidents(page = 1) {
         pagination.innerHTML = "";
     }
 }
+
 
 // Функция для получения общего числа инцидентов
 async function getTotalIncidents() {
@@ -684,20 +711,18 @@ function renderIncidentPagination(page, totalPages) {
     const box = pagination;
     box.innerHTML = "";
 
-    if (totalPages <= 1) return;
+    if (totalPages <= 1) return; // оставляем, но убедимся, что totalPages > 1 корректно
 
-    const maxVisible = 5; // макс. видимых кнопок страниц
-
-    // кнопка назад
-    if (page > 1) box.appendChild(pageBtn("←", () => loadIncidents(page - 1)));
+    const maxVisible = 5;
 
     let start = 1;
     let end = totalPages;
 
+    if (page > 1) box.appendChild(pageBtn("←", () => changePage(page - 1)));
+
     if (totalPages > maxVisible) {
         start = Math.max(1, page - Math.floor(maxVisible / 2));
         end = start + maxVisible - 1;
-
         if (end > totalPages) {
             end = totalPages;
             start = end - maxVisible + 1;
@@ -705,19 +730,18 @@ function renderIncidentPagination(page, totalPages) {
     }
 
     if (start > 1) {
-        box.appendChild(pageBtn(1, () => loadIncidents(1)));
+        box.appendChild(pageBtn(1, () => changePage(1)));
         if (start > 2) {
             const dots = document.createElement("span");
             dots.className = "dots";
             dots.textContent = "...";
-            dots.style.cursor = "pointer";
-            dots.onclick = () => loadIncidents(Math.max(1, start - Math.floor(maxVisible / 2)));
+            dots.onclick = () => changePage(Math.max(1, start - Math.floor(maxVisible / 2)));
             box.appendChild(dots);
         }
     }
 
     for (let p = start; p <= end; p++) {
-        const btn = pageBtn(p, () => loadIncidents(p));
+        const btn = pageBtn(p, () => changePage(p));
         if (p === page) btn.classList.add("active");
         box.appendChild(btn);
     }
@@ -727,15 +751,13 @@ function renderIncidentPagination(page, totalPages) {
             const dots = document.createElement("span");
             dots.className = "dots";
             dots.textContent = "...";
-            dots.style.cursor = "pointer";
-            dots.onclick = () => loadIncidents(Math.min(totalPages, end + Math.floor(maxVisible / 2)));
+            dots.onclick = () => changePage(Math.min(totalPages, end + Math.floor(maxVisible / 2)));
             box.appendChild(dots);
         }
-        box.appendChild(pageBtn(totalPages, () => loadIncidents(totalPages)));
+        box.appendChild(pageBtn(totalPages, () => changePage(totalPages)));
     }
 
-    // кнопка вперед
-    if (page < totalPages) box.appendChild(pageBtn("→", () => loadIncidents(page + 1)));
+    if (page < totalPages) box.appendChild(pageBtn("→", () => changePage(page + 1)));
 }
 
 // Кнопка страницы
@@ -775,6 +797,83 @@ function showSuccessModal(message) {
 closeSuccessModal.addEventListener("click", () => {
     successModal.style.display = "none";
 });
+
+levelFilterBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    levelFilterPopup.style.display =
+        levelFilterPopup.style.display === "block" ? "none" : "block";
+});
+
+levelFilterPopup.addEventListener("click", (e) => {
+    e.stopPropagation();
+});
+
+
+cancelLevelFilterBtn.addEventListener("click", () => {
+    levelFilterPopup.style.display = "none";
+});
+
+// закрытие по клику вне
+document.addEventListener("click", () => {
+    levelFilterPopup.style.display = "none";
+});
+
+applyLevelFilterBtn.addEventListener("click", () => {
+    selectedLevelFilters =
+        Array.from(levelFilterPopup.querySelectorAll("input[type='checkbox']:checked"))
+            .map(cb => cb.value);
+
+    levelFilterPopup.style.display = "none";
+    applyFilters();
+});
+
+function applyFilters() {
+    filteredIncidents = [...allIncidents];
+
+    if (selectedLevelFilters.length > 0) {
+        filteredIncidents = filteredIncidents.filter(i =>
+            selectedLevelFilters.includes(i.level)
+        );
+    }
+
+    currentIncidentPage = 1;  // сброс на первую страницу при новом фильтре
+    renderPage();
+    updateFilterIcon();
+}
+
+function renderPage() {
+    const start = (currentIncidentPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    const pageItems = filteredIncidents.slice(start, end);
+
+    renderIncidents(pageItems);
+
+    const totalPages = Math.ceil(filteredIncidents.length / PAGE_SIZE);
+    renderIncidentPagination(currentIncidentPage, totalPages);
+
+    if (pageItems.length === 0) {
+        noIncidents.textContent = "Нет инцидентов, подходящих под условия фильтра";
+        noIncidents.style.display = "block";
+    } else {
+        noIncidents.style.display = "none";
+    }
+}
+
+function changePage(page) {
+    currentIncidentPage = page;
+    renderPage();
+}
+
+function updateFilterIcon() {
+    const icon = document.getElementById("levelFilterActiveIcon");
+    if (selectedLevelFilters.length > 0) {
+        icon.style.display = "inline";
+    } else {
+        icon.style.display = "none";
+    }
+}
+
+
 
 
 

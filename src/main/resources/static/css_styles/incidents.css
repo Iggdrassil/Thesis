@@ -11,7 +11,7 @@
     flex: 1;
     width: 95%;
     min-height: 400px;
-    max-height: 450px;
+    max-height: 600px;
     overflow: visible;
     justify-content: space-between;
     transition: height 0.3s ease;
@@ -45,6 +45,7 @@
 .incident-info,
 .incident-meta1,
 .incident-meta2 {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -352,5 +353,73 @@
 #recsModal { z-index: 3005; }
 #editIncidentModal { z-index: 2005; }
 #incidentModal { z-index: 2000; }
+
+.incident-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 100px; /*  как у .incident-item */
+    align-items: center;
+    text-align: center;
+    padding: 12px 0;              /*  как у .incident-item */
+    gap: 10px;                    /*  как у .incident-item */
+
+    background: #f3f4f6;
+    border-bottom: 2px solid #d1d5db;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+
+.incident-header > div {
+    display: flex;
+    gap: 8px;
+}
+
+.incident-header .incident-info,
+.incident-header .incident-meta1,
+.incident-header .incident-meta2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Первая колонка — влево (как у данных) */
+.incident-header .incident-info {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Остальные — по центру */
+.incident-header .incident-meta1,
+.incident-header .incident-meta2 {
+    align-items: center;
+    text-align: center;
+}
+
+/* Действия — по центру */
+.incident-header .incident-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.level-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+}
+
+.filter-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    padding: 4px 0;
+}
+
+
 
 
