@@ -64,3 +64,38 @@
 .hidden {
     display: none;
 }
+
+/* ===== ШАПКА ТАБЛИЦЫ АУДИТА ===== */
+.audit-header {
+    display: grid;
+    grid-template-columns: 5fr 1fr 1fr; /* совпадает с .audit-item */
+    align-items: center;
+    padding: 10px;
+    background: #f3f4f6;
+    border-bottom: 2px solid #d1d5db;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    text-align: left;
+}
+
+.audit-header .header-event {
+    display: flex;
+    flex-direction: column;
+}
+
+.audit-header .subheader {
+    font-weight: normal;
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 2px;
+}
+
+.audit-header .header-initiator,
+.audit-header .header-datetime {
+    text-align: left; /* выравнивание текста внутри колонки */
+    padding-left: 24px; /* отступ от левой границы колонки */
+}
+
