@@ -19,6 +19,11 @@ const roleFilterBtn = document.getElementById("roleFilterBtn");
 const roleFilterPopup = document.getElementById("roleFilterPopup");
 const roleFilterOptions = document.getElementById("roleFilterOptions");
 const roleFilterActiveIcon = document.getElementById("roleFilterActiveIcon");
+let usernameFilterState = "";
+const userNameFilterBtn = document.getElementById("userNameFilterBtn");
+const usernameFilterPopup = document.getElementById("usernameFilterPopup");
+const usernameFilterInput = document.getElementById("usernameFilterInput");
+const userNameFilterActiveIcon = document.getElementById("userNameFilterActiveIcon");
 
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -315,7 +320,18 @@ async function render(page = 1) {
     userList.innerHTML = "";
     pagination.innerHTML = "";
 
-    if (!data.users.length) {
+    let users = data.users;
+
+    // 🔹 ФИЛЬТР ПО ИМЕНИ (регистронезависимый)
+    if (usernameFilterState) {
+        const search = usernameFilterState.toLowerCase();
+        users = users.filter(u =>
+            u.username.toLowerCase().includes(search)
+        );
+    }
+
+    // 🔹 ЕСЛИ ПОСЛЕ ВСЕХ ФИЛЬТРОВ ПУСТО
+    if (!users.length) {
         userList.innerHTML = `
             <li style="text-align:center; margin-top:1rem;">
                 Нет пользователей, подходящих под условия фильтра
@@ -323,7 +339,7 @@ async function render(page = 1) {
         return;
     }
 
-    data.users.forEach(user => {
+    users.forEach(user => {
         const li = document.createElement("li");
         li.classList.add("user-item");
 
@@ -362,7 +378,6 @@ async function render(page = 1) {
 
     renderPagination(data.page, data.totalPages);
 }
-
 
 function renderPagination(currentPage, totalPages) {
     const box = pagination;
@@ -504,7 +519,43 @@ document.getElementById("cancelRoleFilter").addEventListener("click", () => {
 
 document.addEventListener("click", () => {
     roleFilterPopup.style.display = "none";
+    usernameFilterPopup.style.display = "none";
 });
+
+userNameFilterBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    // закрываем остальные попапы
+    document.querySelectorAll(".filter-popup").forEach(p => {
+        if (p !== usernameFilterPopup) p.style.display = "none";
+    });
+
+    usernameFilterPopup.style.display =
+        usernameFilterPopup.style.display === "block" ? "none" : "block";
+});
+
+usernameFilterPopup.addEventListener("click", (e) => {
+    e.stopPropagation();
+});
+
+document.getElementById("applyUserNameFilter").addEventListener("click", () => {
+    usernameFilterState = usernameFilterInput.value.trim();
+
+    usernameFilterPopup.style.display = "none";
+
+    userNameFilterActiveIcon.style.display =
+        usernameFilterState ? "inline" : "none";
+
+    render(1); // начинаем с первой страницы
+});
+
+document.getElementById("cancelUserNameFilter").addEventListener("click", () => {
+    usernameFilterInput.value = usernameFilterState;
+    usernameFilterPopup.style.display = "none";
+});
+
+
+
 
 
 
