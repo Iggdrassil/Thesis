@@ -225,3 +225,12 @@ header, .settings-header {
     border: 1px solid #d1d5db;
     font-size: 14px;
 }
+
+.filter-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 400;
+    color: #111827;
+}
