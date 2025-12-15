@@ -7,6 +7,7 @@ import database.DTO.PageResultDTO;
 import database.DTO.UserDTO;
 import database.models.User;
 import enums.UserError;
+import enums.UserRole;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,9 +57,21 @@ public class UserController {
 
     @ResponseBody
     @GetMapping("/list")
-    public Map<String, Object> getUsers(@RequestParam(defaultValue = "1") int page) {
+    public Map<String, Object> getUsers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(required = false) List<UserRole> roles
+    ) {
 
-        PageResultDTO<User> result = PaginationUtils.paginateList(userDAO.getAllUsers(), page, PAGE_SIZE);
+        List<User> users = userDAO.getAllUsers();
+
+        if (roles != null && !roles.isEmpty()) {
+            users = users.stream()
+                    .filter(u -> roles.contains(u.getRole()))
+                    .toList();
+        }
+
+        PageResultDTO<User> result =
+                PaginationUtils.paginateList(users, page, PAGE_SIZE);
 
         return Map.of(
                 "users", result.getContent(),
@@ -66,6 +79,7 @@ public class UserController {
                 "totalPages", result.getTotalPages()
         );
     }
+
 
     @ResponseBody
     @PostMapping("/add")

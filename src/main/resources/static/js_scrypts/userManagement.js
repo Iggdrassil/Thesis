@@ -7,6 +7,19 @@ const pagination = document.getElementById("pagination");
 const header = document.querySelector('meta[name="_csrf_header"]').content;
 const token = document.querySelector('meta[name="_csrf"]').content;
 
+let roleFilterState = new Set();
+let currentPageGlobal = 1;
+
+const ROLES = [
+    { value: "ADMIN", label: "Администратор ИБ" },
+    { value: "AUDITOR", label: "Аудитор" },
+    { value: "USER", label: "Пользователь" }
+];
+const roleFilterBtn = document.getElementById("roleFilterBtn");
+const roleFilterPopup = document.getElementById("roleFilterPopup");
+const roleFilterOptions = document.getElementById("roleFilterOptions");
+const roleFilterActiveIcon = document.getElementById("roleFilterActiveIcon");
+
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentPage = parseInt(urlParams.get("page")) || 1;
@@ -277,8 +290,17 @@ closeErrorModal.addEventListener("click", () => {
 
 async function fetchUsers(page) {
     try {
-        const response = await fetch(`/users/list?page=${page}`);
+        const params = new URLSearchParams();
+        params.set("page", page);
+
+        // добавляем фильтр ролей
+        roleFilterState.forEach(role => {
+            params.append("roles", role);
+        });
+
+        const response = await fetch(`/users/list?${params.toString()}`);
         if (!response.ok) throw new Error("Ошибка при загрузке данных");
+
         return await response.json();
     } catch (e) {
         console.error("Ошибка запроса:", e);
@@ -287,12 +309,17 @@ async function fetchUsers(page) {
 }
 
 async function render(page = 1) {
+    currentPageGlobal = page;
+
     const data = await fetchUsers(page);
     userList.innerHTML = "";
     pagination.innerHTML = "";
 
     if (!data.users.length) {
-        userList.innerHTML = `<li style="text-align:center; margin-top:1rem;">Нет пользователей</li>`;
+        userList.innerHTML = `
+            <li style="text-align:center; margin-top:1rem;">
+                Нет пользователей, подходящих под условия фильтра
+            </li>`;
         return;
     }
 
@@ -303,24 +330,25 @@ async function render(page = 1) {
         const isCurrentUser = user.username === currentUser;
 
         li.innerHTML = `
-        <div class="user-info">
-            <strong>${user.username}</strong>
-            <span>${user.role}</span>
-        </div>
-        <div class="user-actions">
-            <button class="icon-button" title="Редактировать">
-                <img src="/web/static/icons/edit.png" alt="Редактировать">
-            </button>
-            <button class="icon-button ${isCurrentUser ? 'disabled' : ''}" title="Удалить"
-                ${isCurrentUser ? 'disabled' : ''}>
-                <img src="/web/static/icons/${isCurrentUser ? 'deleteUnable.png' : 'delete.png'}" alt="Удалить">
-            </button>
-        </div>
+            <div class="user-info">
+                <strong>${user.username}</strong>
+                <span>${user.role}</span>
+            </div>
+            <div class="user-actions">
+                <button class="icon-button" title="Редактировать">
+                    <img src="/web/static/icons/edit.png" alt="Редактировать">
+                </button>
+                <button class="icon-button ${isCurrentUser ? 'disabled' : ''}"
+                        title="Удалить"
+                        ${isCurrentUser ? 'disabled' : ''}>
+                    <img src="/web/static/icons/${isCurrentUser ? 'deleteUnable.png' : 'delete.png'}"
+                         alt="Удалить">
+                </button>
+            </div>
         `;
 
-        // делегируем события на кнопки
-        const editBtn = li.querySelector(".user-actions button:first-child");
-        editBtn.addEventListener("click", () => editUser(user.username));
+        li.querySelector(".user-actions button:first-child")
+            .addEventListener("click", () => editUser(user.username));
 
         const deleteBtn = li.querySelector(".user-actions button:last-child");
         if (!isCurrentUser) {
@@ -330,11 +358,11 @@ async function render(page = 1) {
         userList.appendChild(li);
     });
 
-    // скрываем скролл при пагинации
     userList.style.overflowY = data.totalPages > 1 ? "hidden" : "auto";
 
     renderPagination(data.page, data.totalPages);
 }
+
 
 function renderPagination(currentPage, totalPages) {
     const box = pagination;
@@ -418,4 +446,65 @@ function showSuccessModal(message) {
 closeSuccessModal.addEventListener("click", () => {
     successModal.style.display = "none";
 });
+
+roleFilterBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    // закрываем другие попапы если будут
+    document.querySelectorAll(".filter-popup").forEach(p => {
+        if (p !== roleFilterPopup) p.style.display = "none";
+    });
+
+    roleFilterPopup.style.display =
+        roleFilterPopup.style.display === "block" ? "none" : "block";
+});
+
+roleFilterPopup.addEventListener("click", (e) => {
+    e.stopPropagation();
+});
+
+function renderRoleFilterOptions() {
+    roleFilterOptions.innerHTML = "";
+
+    ROLES.forEach(role => {
+        const label = document.createElement("label");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = role.value;
+        checkbox.checked = roleFilterState.has(role.value);
+
+        checkbox.addEventListener("change", () => {
+            checkbox.checked
+                ? roleFilterState.add(role.value)
+                : roleFilterState.delete(role.value);
+        });
+
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(role.label));
+
+        roleFilterOptions.appendChild(label);
+    });
+}
+
+renderRoleFilterOptions();
+
+document.getElementById("applyRoleFilter").addEventListener("click", () => {
+    roleFilterPopup.style.display = "none";
+
+    roleFilterActiveIcon.style.display =
+        roleFilterState.size ? "inline" : "none";
+
+    render(1); // ВСЕГДА начинаем с первой страницы
+});
+
+document.getElementById("cancelRoleFilter").addEventListener("click", () => {
+    roleFilterPopup.style.display = "none";
+});
+
+document.addEventListener("click", () => {
+    roleFilterPopup.style.display = "none";
+});
+
+
 
