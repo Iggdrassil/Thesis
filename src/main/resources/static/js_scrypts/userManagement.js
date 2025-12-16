@@ -322,7 +322,6 @@ async function render(page = 1) {
 
     let users = data.users;
 
-    // 🔹 ФИЛЬТР ПО ИМЕНИ (регистронезависимый)
     if (usernameFilterState) {
         const search = usernameFilterState.toLowerCase();
         users = users.filter(u =>
@@ -330,7 +329,6 @@ async function render(page = 1) {
         );
     }
 
-    // 🔹 ЕСЛИ ПОСЛЕ ВСЕХ ФИЛЬТРОВ ПУСТО
     if (!users.length) {
         userList.innerHTML = `
             <li style="text-align:center; margin-top:1rem;">

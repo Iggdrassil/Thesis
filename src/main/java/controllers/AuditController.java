@@ -2,6 +2,7 @@ package controllers;
 
 import database.DAO.AuditDAO;
 import database.DTO.AuditRecordDto;
+import enums.AuditEventType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,27 +36,28 @@ public class AuditController {
 
     @GetMapping("/list")
     @ResponseBody
-    public Map<String, Object> getList(@RequestParam(defaultValue = "1") int page) {
-        log.info("Requesting list of audit records");
-
-        int total = auditDAO.count();
+    public Map<String, Object> getList(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(required = false) List<AuditEventType> events
+    ) {
         int pageSize = 5;
 
+        int total = auditDAO.countFiltered(events);
         int totalPages = (int) Math.ceil((double) total / pageSize);
-        page = PaginationUtils.safePageNumber(page, totalPages);
 
+        page = PaginationUtils.safePageNumber(page, totalPages);
         int offset = PaginationUtils.offsetForPage(page, pageSize);
 
-        List<AuditRecordDto> list = auditDAO.getPaged(offset, pageSize);
+        List<AuditRecordDto> list =
+                auditDAO.getPagedFiltered(events, offset, pageSize);
 
-        Map<String, Object> response = new HashMap<>();
-
-        response.put("records", list);
-        response.put("page", page);
-        response.put("totalPages", totalPages);
-
-        return response;
+        return Map.of(
+                "records", list,
+                "page", page,
+                "totalPages", totalPages
+        );
     }
+
 
 }
 

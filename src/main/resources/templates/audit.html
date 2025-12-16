@@ -37,10 +37,53 @@
 
         <div class="audit-header">
             <div class="header-event">
-                <div>Событие</div>
+                <div class="event-header">
+                    <span>Событие</span>
+                    <button class="filter-btn" id="auditEventFilterBtn">
+                        <img src="/web/static/icons/filter.png">
+                    </button>
+                    <img id="auditEventFilterActiveIcon" src="/web/static/icons/active-filter.png"
+                         alt="Фильтр активирован"
+                         title="Фильтр активирован"
+                         class="filter-active-icon" style="display:none; cursor:pointer;">
+                </div>
+
+                <div class="filter-popup" id="auditEventFilterPopup">
+                    <div class="filter-options" id="auditEventFilterOptions"></div>
+                    <div class="filter-actions">
+                        <button id="applyAuditEventFilter" class="danger">Применить</button>
+                        <button id="cancelAuditEventFilter">Отмена</button>
+                    </div>
+                </div>
+
                 <div class="subheader">Описание</div>
             </div>
-            <div class="header-initiator">Инициатор</div>
+
+            <div class="header-initiator">
+                <div class="event-header">
+                    <span>Инициатор</span>
+                    <button class="filter-btn" id="auditUserFilterBtn">
+                        <img src="/web/static/icons/filter.png">
+                    </button>
+                    <img id="auditUserFilterActiveIcon"
+                         src="/web/static/icons/active-filter.png"
+                         class="filter-active-icon"
+                         style="display:none; cursor:pointer;">
+                </div>
+
+                <div class="filter-popup" id="auditUserFilterPopup">
+                    <div class="filter-options">
+                        <input type="text"
+                               id="auditUserFilterInput"
+                               placeholder="Введите имя пользователя">
+                    </div>
+                    <div class="filter-actions">
+                        <button id="applyAuditUserFilter" class="danger">Применить</button>
+                        <button id="cancelAuditUserFilter">Отмена</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="header-datetime">Дата и время</div>
         </div>
 

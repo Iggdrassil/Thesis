@@ -3,15 +3,50 @@ const token = document.querySelector('meta[name="_csrf"]').content;
 const logoutButton = document.getElementById("logoutButton");
 
 let currentPage = 1;
+let auditEventFilterState = new Set(); // enum-ключи событий
+const AUDIT_EVENTS = [
+    { value: "USER_LOGIN", label: "Вход пользователя" },
+    { value: "USER_LOGOUT", label: "Выход пользователя" },
+    { value: "USER_CREATED", label: "Создание пользователя" },
+    { value: "USER_DELETED", label: "Удаление пользователя" },
+    { value: "INCIDENT_CREATED", label: "Создание инцидента" },
+    { value: "INCIDENT_CREATE_ERROR", label: "Ошибка создания инцидента" },
+    { value: "INCIDENT_UPDATED", label: "Изменение инцидента" },
+    { value: "INCIDENT_DELETED", label: "Удаление инцидента" },
+    { value: "USER_EDITED", label: "Изменение пользователя" },
+    { value: "USER_LOGIN_BLOCK", label: "Блокировка входа" },
+    { value: "USER_LOGIN_UNBLOCK", label: "Снятие блокировки" },
+    { value: "EMAIL_NOTIFICATION_ENABLE", label: "Email включён" },
+    { value: "EMAIL_NOTIFICATION_DISABLE", label: "Email отключён" },
+    { value: "SEND_EMAIL_SUCCESS", label: "Отправка письма" },
+    { value: "SEND_EMAIL_FAIL", label: "Ошибка отправки письма" }
+];
+
+const eventFilterBtn = document.getElementById("auditEventFilterBtn");
+const eventFilterPopup = document.getElementById("auditEventFilterPopup");
+const eventFilterOptions = document.getElementById("auditEventFilterOptions");
+const applyEventFilterBtn = document.getElementById("applyAuditEventFilter");
+const cancelEventFilterBtn = document.getElementById("cancelAuditEventFilter");
+
+
 
 async function loadAudit(page = 1) {
-    const resp = await fetch(`/audit/list?page=${page}`);
+    currentPage = page;
+
+    const params = new URLSearchParams();
+    params.set("page", page);
+
+    auditEventFilterState.forEach(ev => {
+        params.append("events", ev);
+    });
+
+    const resp = await fetch(`/audit/list?${params.toString()}`);
     const data = await resp.json();
 
-    currentPage = data.page;
     renderList(data.records);
     renderPagination(data.page, data.totalPages);
 }
+
 
 function renderList(records) {
     const list = document.getElementById("audit-list");
@@ -20,6 +55,7 @@ function renderList(records) {
     list.innerHTML = "";
 
     if (records.length === 0) {
+        empty.textContent = "Нет записей, подходящих под условия фильтра";
         empty.classList.remove("hidden");
         return;
     }
@@ -136,5 +172,58 @@ logoutButton.addEventListener('click', () => {
             .then(() => window.location.href = '/login?logout=true');
     }
 });
+
+eventFilterBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    eventFilterPopup.style.display =
+        eventFilterPopup.style.display === "block" ? "none" : "block";
+});
+
+eventFilterPopup.addEventListener("click", e => e.stopPropagation());
+
+document.addEventListener("click", () => {
+    eventFilterPopup.style.display = "none";
+});
+
+function renderEventFilterOptions() {
+    eventFilterOptions.innerHTML = "";
+
+    AUDIT_EVENTS.forEach(ev => {
+        const label = document.createElement("label");
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = ev.value;
+        cb.checked = auditEventFilterState.has(ev.value);
+
+        cb.addEventListener("change", () => {
+            cb.checked
+                ? auditEventFilterState.add(ev.value)
+                : auditEventFilterState.delete(ev.value);
+        });
+
+        label.appendChild(cb);
+        label.append(ev.label);
+        eventFilterOptions.appendChild(label);
+    });
+}
+
+renderEventFilterOptions();
+
+applyEventFilterBtn.addEventListener("click", () => {
+    eventFilterPopup.style.display = "none";
+
+    // иконка активного фильтра
+    document.getElementById("auditEventFilterActiveIcon").style.display =
+        auditEventFilterState.size ? "inline" : "none";
+
+    loadAudit(1); // ВСЕГДА с первой страницы
+});
+
+
+cancelEventFilterBtn.addEventListener("click", () => {
+    eventFilterPopup.style.display = "none";
+});
+
 
 loadAudit();

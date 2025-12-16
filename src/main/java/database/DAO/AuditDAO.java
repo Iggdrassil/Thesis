@@ -2,6 +2,7 @@ package database.DAO;
 
 import database.DTO.AuditRecordDto;
 import database.Database;
+import enums.AuditEventType;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,4 +100,91 @@ public class AuditDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public int countFiltered(List<AuditEventType> eventTypes) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM audit_log WHERE 1=1"
+        );
+
+        if (eventTypes != null && !eventTypes.isEmpty()) {
+            sql.append(" AND event_type IN (");
+            sql.append(String.join(",", eventTypes.stream().map(e -> "?").toList()));
+            sql.append(")");
+        }
+
+        try (Connection conn = database.createConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            if (eventTypes != null && !eventTypes.isEmpty()) {
+                for (int i = 0; i < eventTypes.size(); i++) {
+                    ps.setString(i + 1, eventTypes.get(i).toString());
+                }
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting filtered audit records", e);
+        }
+    }
+
+    public List<AuditRecordDto> getPagedFiltered(
+            List<AuditEventType> eventTypes,
+            int offset,
+            int limit
+    ) {
+        StringBuilder sql = new StringBuilder("""
+            SELECT *
+            FROM audit_log
+            WHERE 1=1
+            """);
+
+        if (eventTypes != null && !eventTypes.isEmpty()) {
+            sql.append(" AND event_type IN (");
+            sql.append(String.join(",", eventTypes.stream().map(e -> "?").toList()));
+            sql.append(")");
+        }
+
+        sql.append(" ORDER BY creation_datetime DESC LIMIT ? OFFSET ?");
+
+        List<AuditRecordDto> list = new ArrayList<>();
+
+        try (Connection conn = database.createConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+
+            if (eventTypes != null && !eventTypes.isEmpty()) {
+                for (AuditEventType type : eventTypes) {
+                    ps.setString(index++, type.toString());
+                }
+            }
+
+            ps.setInt(index++, limit);
+            ps.setInt(index, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    AuditRecordDto dto = new AuditRecordDto();
+
+                    dto.id = rs.getString("id");
+                    dto.eventType = rs.getString("event_type");
+                    dto.title = rs.getString("title");
+                    dto.description = rs.getString("description");
+                    dto.username = rs.getString("username");
+                    dto.creationDatetime = rs.getString("creation_datetime");
+
+                    list.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching filtered audit records", e);
+        }
+
+        return list;
+    }
+
 }

@@ -11,7 +11,7 @@
     width: 95%;
     min-height: 400px;
     max-height: 500px;
-    overflow: hidden;
+/*    overflow: hidden;*/
 }
 
 .audit-card h3 {
@@ -79,6 +79,7 @@
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     text-align: left;
+    position: relative;
 }
 
 .audit-header .header-event {
@@ -98,4 +99,3 @@
     text-align: left; /* выравнивание текста внутри колонки */
     padding-left: 24px; /* отступ от левой границы колонки */
 }
-
