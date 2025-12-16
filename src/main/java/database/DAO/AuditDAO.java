@@ -101,7 +101,7 @@ public class AuditDAO {
         }
     }
 
-    public int countFiltered(List<AuditEventType> eventTypes) {
+    public int countFiltered(List<AuditEventType> eventTypes, String username) {
         StringBuilder sql = new StringBuilder(
                 "SELECT COUNT(*) FROM audit_log WHERE 1=1"
         );
@@ -112,13 +112,24 @@ public class AuditDAO {
             sql.append(")");
         }
 
+        if (username != null && !username.isBlank()) {
+            sql.append(" AND LOWER(username) LIKE ?");
+        }
+
         try (Connection conn = database.createConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
+            int idx = 1;
+
+
             if (eventTypes != null && !eventTypes.isEmpty()) {
-                for (int i = 0; i < eventTypes.size(); i++) {
-                    ps.setString(i + 1, eventTypes.get(i).toString());
+                for (AuditEventType eventType : eventTypes) {
+                    ps.setString(idx + 1, eventType.toString());
                 }
+            }
+
+            if (username != null && !username.isBlank()) {
+                ps.setString(idx, "%" + username.toLowerCase() + "%");
             }
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -132,6 +143,7 @@ public class AuditDAO {
 
     public List<AuditRecordDto> getPagedFiltered(
             List<AuditEventType> eventTypes,
+            String username,
             int offset,
             int limit
     ) {
@@ -147,6 +159,10 @@ public class AuditDAO {
             sql.append(")");
         }
 
+        if (username != null && !username.isBlank()) {
+            sql.append(" AND LOWER(username) LIKE ?");
+        }
+
         sql.append(" ORDER BY creation_datetime DESC LIMIT ? OFFSET ?");
 
         List<AuditRecordDto> list = new ArrayList<>();
@@ -160,6 +176,10 @@ public class AuditDAO {
                 for (AuditEventType type : eventTypes) {
                     ps.setString(index++, type.toString());
                 }
+            }
+
+            if (username != null && !username.isBlank()) {
+                ps.setString(index++, "%" + username.toLowerCase() + "%");
             }
 
             ps.setInt(index++, limit);

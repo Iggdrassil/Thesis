@@ -4,6 +4,8 @@ const logoutButton = document.getElementById("logoutButton");
 
 let currentPage = 1;
 let auditEventFilterState = new Set(); // enum-ключи событий
+let auditUserFilterValue = "";
+
 const AUDIT_EVENTS = [
     { value: "USER_LOGIN", label: "Вход пользователя" },
     { value: "USER_LOGOUT", label: "Выход пользователя" },
@@ -27,7 +29,13 @@ const eventFilterPopup = document.getElementById("auditEventFilterPopup");
 const eventFilterOptions = document.getElementById("auditEventFilterOptions");
 const applyEventFilterBtn = document.getElementById("applyAuditEventFilter");
 const cancelEventFilterBtn = document.getElementById("cancelAuditEventFilter");
-
+const userFilterBtn = document.getElementById("auditUserFilterBtn");
+const userFilterPopup = document.getElementById("auditUserFilterPopup");
+const userFilterInput = document.getElementById("auditUserFilterInput");
+const applyUserFilterBtn = document.getElementById("applyAuditUserFilter");
+const cancelUserFilterBtn = document.getElementById("cancelAuditUserFilter");
+const userFilterActiveIcon =
+    document.getElementById("auditUserFilterActiveIcon");
 
 
 async function loadAudit(page = 1) {
@@ -35,6 +43,16 @@ async function loadAudit(page = 1) {
 
     const params = new URLSearchParams();
     params.set("page", page);
+
+// фильтр по событиям
+    auditEventFilterState.forEach(ev => {
+        params.append("events", ev);
+    });
+
+// фильтр по username
+    if (auditUserFilterValue) {
+        params.set("username", auditUserFilterValue);
+    }
 
     auditEventFilterState.forEach(ev => {
         params.append("events", ev);
@@ -223,6 +241,29 @@ applyEventFilterBtn.addEventListener("click", () => {
 
 cancelEventFilterBtn.addEventListener("click", () => {
     eventFilterPopup.style.display = "none";
+    userFilterPopup.style.display = "none";
+});
+
+userFilterBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    userFilterPopup.style.display =
+        userFilterPopup.style.display === "block" ? "none" : "block";
+});
+
+userFilterPopup.addEventListener("click", e => e.stopPropagation());
+
+applyUserFilterBtn.addEventListener("click", () => {
+    auditUserFilterValue = userFilterInput.value.trim();
+
+    userFilterPopup.style.display = "none";
+    userFilterActiveIcon.style.display =
+        auditUserFilterValue ? "inline" : "none";
+
+    loadAudit(1);
+});
+
+cancelUserFilterBtn.addEventListener("click", () => {
+    userFilterPopup.style.display = "none";
 });
 
 

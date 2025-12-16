@@ -73,7 +73,7 @@
     padding: 10px;
     background: #f3f4f6;
     border-bottom: 2px solid #d1d5db;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: #374151;
     border-top-left-radius: 20px;
@@ -94,8 +94,16 @@
     margin-top: 2px;
 }
 
-.audit-header .header-initiator,
+.audit-header .header-initiator {
+    text-align: left; /* выравнивание текста внутри колонки */
+    padding-left: 4px; /* отступ от левой границы колонки */
+}
+
 .audit-header .header-datetime {
     text-align: left; /* выравнивание текста внутри колонки */
     padding-left: 24px; /* отступ от левой границы колонки */
+}
+
+#auditUserFilterPopup {
+    width: 200px;
 }

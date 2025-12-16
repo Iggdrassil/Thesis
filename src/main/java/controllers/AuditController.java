@@ -38,18 +38,19 @@ public class AuditController {
     @ResponseBody
     public Map<String, Object> getList(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(required = false) List<AuditEventType> events
+            @RequestParam(required = false) List<AuditEventType> events,
+            @RequestParam(required = false) String username
     ) {
         int pageSize = 5;
 
-        int total = auditDAO.countFiltered(events);
+        int total = auditDAO.countFiltered(events, username);
         int totalPages = (int) Math.ceil((double) total / pageSize);
 
         page = PaginationUtils.safePageNumber(page, totalPages);
         int offset = PaginationUtils.offsetForPage(page, pageSize);
 
         List<AuditRecordDto> list =
-                auditDAO.getPagedFiltered(events, offset, pageSize);
+                auditDAO.getPagedFiltered(events, username, offset, pageSize);
 
         return Map.of(
                 "records", list,
