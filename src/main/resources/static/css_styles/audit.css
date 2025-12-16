@@ -101,9 +101,14 @@
 
 .audit-header .header-datetime {
     text-align: left; /* выравнивание текста внутри колонки */
-    padding-left: 24px; /* отступ от левой границы колонки */
+    padding-left: 2px; /* отступ от левой границы колонки */
 }
 
 #auditUserFilterPopup {
     width: 200px;
+}
+
+#auditDateFilterActiveIcon {
+    width: 10px;          /* размер иконки */
+    height: 10px;
 }

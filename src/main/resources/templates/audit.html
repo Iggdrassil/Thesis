@@ -85,7 +85,51 @@
                 </div>
             </div>
 
-            <div class="header-datetime">Дата и время</div>
+            <div class="header-datetime">
+                Дата и время
+                <button class="filter-btn" id="auditDateFilterBtn">
+                    <img src="/web/static/icons/filter.png">
+                </button>
+                <img id="auditDateFilterActiveIcon"
+                     src="/web/static/icons/active-filter.png"
+                     class="filter-active-icon"
+                     style="display:none; cursor:pointer;">
+
+                <div class="filter-popup" id="auditDateFilterPopup">
+                    <div class="filter-options">
+                        <div class="date-filter-row">
+                            <label>С</label>
+                            <div class="date-input-wrapper">
+                                <input type="text"
+                                       id="auditDateFrom"
+                                       placeholder="ДД-ММ-ГГГГ"
+                                       maxlength="10">
+                                <button class="calendar-btn" type="button"></button>
+                                <input type="date" class="native-date" data-target="auditDateFrom">
+                            </div>
+                        </div>
+
+                        <div class="date-filter-row">
+                            <label>По</label>
+                            <div class="date-input-wrapper">
+                                <input type="text"
+                                       id="auditDateTo"
+                                       placeholder="ДД-ММ-ГГГГ"
+                                       maxlength="10">
+                                <button class="calendar-btn" type="button"></button>
+                                <input type="date" class="native-date" data-target="auditDateTo">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button id="applyAuditDateFilter" class="danger">Применить</button>
+                        <button id="cancelAuditDateFilter">Отмена</button>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
 
         <!-- Список -->

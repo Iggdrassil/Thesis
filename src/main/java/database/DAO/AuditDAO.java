@@ -101,7 +101,7 @@ public class AuditDAO {
         }
     }
 
-    public int countFiltered(List<AuditEventType> eventTypes, String username) {
+    public int countFiltered(List<AuditEventType> eventTypes, String username, String dateFrom, String dateTo) {
         StringBuilder sql = new StringBuilder(
                 "SELECT COUNT(*) FROM audit_log WHERE 1=1"
         );
@@ -114,6 +114,13 @@ public class AuditDAO {
 
         if (username != null && !username.isBlank()) {
             sql.append(" AND LOWER(username) LIKE ?");
+        }
+
+        if (dateFrom != null && !dateFrom.isBlank()) {
+            sql.append(" AND creation_datetime >= ?");
+        }
+        if (dateTo != null && !dateTo.isBlank()) {
+            sql.append(" AND creation_datetime <= ?");
         }
 
         try (Connection conn = database.createConnection();
@@ -132,6 +139,13 @@ public class AuditDAO {
                 ps.setString(idx, "%" + username.toLowerCase() + "%");
             }
 
+            if (dateFrom != null && !dateFrom.isBlank()) {
+                ps.setString(idx++, convertToISO(dateFrom)); // функция convertToISO("ДД-ММ-ГГГГ") -> "YYYY-MM-DD"
+            }
+            if (dateTo != null && !dateTo.isBlank()) {
+                ps.setString(idx++, convertToISO(dateTo));
+            }
+
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getInt(1) : 0;
             }
@@ -144,6 +158,8 @@ public class AuditDAO {
     public List<AuditRecordDto> getPagedFiltered(
             List<AuditEventType> eventTypes,
             String username,
+            String dateFrom,
+            String dateTo,
             int offset,
             int limit
     ) {
@@ -163,6 +179,13 @@ public class AuditDAO {
             sql.append(" AND LOWER(username) LIKE ?");
         }
 
+        if (dateFrom != null && !dateFrom.isBlank()) {
+            sql.append(" AND creation_datetime >= ?");
+        }
+        if (dateTo != null && !dateTo.isBlank()) {
+            sql.append(" AND creation_datetime <= ?");
+        }
+
         sql.append(" ORDER BY creation_datetime DESC LIMIT ? OFFSET ?");
 
         List<AuditRecordDto> list = new ArrayList<>();
@@ -180,6 +203,13 @@ public class AuditDAO {
 
             if (username != null && !username.isBlank()) {
                 ps.setString(index++, "%" + username.toLowerCase() + "%");
+            }
+
+            if (dateFrom != null && !dateFrom.isBlank()) {
+                ps.setString(index++, convertToISO(dateFrom)); // функция convertToISO("ДД-ММ-ГГГГ") -> "YYYY-MM-DD"
+            }
+            if (dateTo != null && !dateTo.isBlank()) {
+                ps.setString(index++, convertToISO(dateTo));
             }
 
             ps.setInt(index++, limit);
@@ -207,4 +237,16 @@ public class AuditDAO {
         return list;
     }
 
+    private static String convertToISO(String dateStr) {
+        if (dateStr == null || !dateStr.matches("\\d{2}-\\d{2}-\\d{4}")) {
+            throw new IllegalArgumentException("Неверный формат даты: " + dateStr);
+        }
+
+        String[] parts = dateStr.split("-");
+        String day = parts[0];
+        String month = parts[1];
+        String year = parts[2];
+
+        return year + "-" + month + "-" + day;
+    }
 }

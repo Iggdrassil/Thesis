@@ -234,3 +234,47 @@ header, .settings-header {
     font-weight: 400;
     color: #111827;
 }
+
+.date-filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.date-input-wrapper {
+    position: relative;
+}
+
+.date-input-wrapper input[type="text"] {
+    width: 100%;
+    padding: 6px 32px 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.calendar-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    background: url("/web/static/icons/calendar.png") center/contain no-repeat;
+    border: none;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.calendar-btn:hover {
+    opacity: 1;
+}
+
+.native-date {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}

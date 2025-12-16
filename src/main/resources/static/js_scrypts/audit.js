@@ -5,6 +5,8 @@ const logoutButton = document.getElementById("logoutButton");
 let currentPage = 1;
 let auditEventFilterState = new Set(); // enum-ключи событий
 let auditUserFilterValue = "";
+let auditDateFrom = "";
+let auditDateTo = "";
 
 const AUDIT_EVENTS = [
     { value: "USER_LOGIN", label: "Вход пользователя" },
@@ -34,8 +36,14 @@ const userFilterPopup = document.getElementById("auditUserFilterPopup");
 const userFilterInput = document.getElementById("auditUserFilterInput");
 const applyUserFilterBtn = document.getElementById("applyAuditUserFilter");
 const cancelUserFilterBtn = document.getElementById("cancelAuditUserFilter");
-const userFilterActiveIcon =
-    document.getElementById("auditUserFilterActiveIcon");
+const userFilterActiveIcon = document.getElementById("auditUserFilterActiveIcon");
+const dateFilterBtn = document.getElementById("auditDateFilterBtn");
+const dateFilterPopup = document.getElementById("auditDateFilterPopup");
+const dateFromInput = document.getElementById("auditDateFrom");
+const dateToInput = document.getElementById("auditDateTo");
+const applyDateFilterBtn = document.getElementById("applyAuditDateFilter");
+const cancelDateFilterBtn = document.getElementById("cancelAuditDateFilter");
+const dateFilterActiveIcon = document.getElementById("auditDateFilterActiveIcon");
 
 
 async function loadAudit(page = 1) {
@@ -53,6 +61,9 @@ async function loadAudit(page = 1) {
     if (auditUserFilterValue) {
         params.set("username", auditUserFilterValue);
     }
+
+    if (auditDateFrom) params.set("dateFrom", auditDateFrom);
+    if (auditDateTo) params.set("dateTo", auditDateTo);
 
     auditEventFilterState.forEach(ev => {
         params.append("events", ev);
@@ -266,5 +277,69 @@ cancelUserFilterBtn.addEventListener("click", () => {
     userFilterPopup.style.display = "none";
 });
 
+// открыть/закрыть попап
+dateFilterBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    dateFilterPopup.style.display =
+        dateFilterPopup.style.display === "block" ? "none" : "block";
+});
+
+dateFilterPopup.addEventListener("click", e => e.stopPropagation());
+document.addEventListener("click", () => {
+    dateFilterPopup.style.display = "none";
+});
+
+// автоподстановка формата ДД-ММ-ГГГГ
+function formatDateInput(e) {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0,2) + "-" + val.slice(2);
+    if (val.length > 5) val = val.slice(0,5) + "-" + val.slice(5,9);
+    e.target.value = val;
+}
+
+dateFromInput.addEventListener("input", formatDateInput);
+dateToInput.addEventListener("input", formatDateInput);
+
+// календарь
+document.querySelectorAll(".native-date").forEach(native => {
+    const targetId = native.dataset.target;
+    const targetInput = document.getElementById(targetId);
+
+    native.addEventListener("change", () => {
+        if (native.value) {
+            const d = new Date(native.value);
+            const dd = String(d.getDate()).padStart(2,"0");
+            const mm = String(d.getMonth()+1).padStart(2,"0");
+            const yyyy = d.getFullYear();
+            targetInput.value = `${dd}-${mm}-${yyyy}`;
+        }
+    });
+});
+
+// кнопка календаря открывает native input
+document.querySelectorAll(".calendar-btn").forEach(btn => {
+    btn.addEventListener("click", e => {
+        e.stopPropagation();
+        const native = btn.parentElement.querySelector(".native-date");
+        native.showPicker?.(); // для современных браузеров
+    });
+});
+
+// применяем фильтр
+applyDateFilterBtn.addEventListener("click", () => {
+    auditDateFrom = dateFromInput.value.trim();
+    auditDateTo = dateToInput.value.trim();
+
+    dateFilterPopup.style.display = "none";
+    dateFilterActiveIcon.style.display =
+        auditDateFrom || auditDateTo ? "inline" : "none";
+
+    loadAudit(1);
+});
+
+// отмена
+cancelDateFilterBtn.addEventListener("click", () => {
+    dateFilterPopup.style.display = "none";
+});
 
 loadAudit();
