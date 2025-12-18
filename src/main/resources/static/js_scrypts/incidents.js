@@ -91,7 +91,6 @@ const cancelDateFilterBtn = document.getElementById("cancelDateFilter");
 // --- события открытия/закрытия ---
 document.addEventListener("DOMContentLoaded", () => {
 
-    // кнопки навигации уже есть в твоём файле — не трогаем
     addIncidentBtn.addEventListener("click", openIncidentModal);
     incidentCloseBtn?.addEventListener("click", closeIncidentModal);
     cancelIncidentBtn?.addEventListener("click", closeIncidentModal);
@@ -693,8 +692,11 @@ function renderIncidents(incidents) {
         item.className = "incident-item";
         item.setAttribute("data-id", incident.id);
 
-        if (role === 'ROLE_USER' || role === 'ROLE_AUDITOR') {
+        if (role === 'ROLE_AUDITOR') {
             addIncidentBtn.style.display = 'none';
+        }
+
+        if (role === 'ROLE_USER' || role === 'ROLE_AUDITOR') {
             item.innerHTML = `
             <div class="incident-info">
                 <strong>${incident.title}</strong>

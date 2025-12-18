@@ -15,6 +15,10 @@ if (role === 'ROLE_AUDITOR') {
     document.getElementById('incidents').style.display = 'none';
 }
 
+if (role === 'ROLE_USER') {
+    document.getElementById('audit').style.display = 'none';
+}
+
 function goTo(section) {
     switch (section) {
         case 'stats':
