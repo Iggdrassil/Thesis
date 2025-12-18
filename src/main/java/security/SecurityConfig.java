@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/css_styles/**",
                                 "/js_scrypts/**",
                                 "/web/static/**",
-                                "/favicon.ico"
+                                "/favicon.ico","/swagger-ui/**",
+                                "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/login", "/error").permitAll() // Страница логина и ошибка — доступны всем
                         .requestMatchers("/users/api/**").hasRole("ADMIN") // только админам

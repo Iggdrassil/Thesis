@@ -3,6 +3,8 @@ package controllers;
 import database.DAO.AuditDAO;
 import database.DTO.AuditRecordDto;
 import enums.AuditEventType;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,7 @@ import java.util.Map;
 @Slf4j
 @Controller
 @RequestMapping("/audit")
+@Tag(name = "Audit", description = "API для работы с событиями системы")
 public class AuditController {
 
     private AuditDAO auditDAO;
@@ -36,6 +39,7 @@ public class AuditController {
 
     @GetMapping("/list")
     @ResponseBody
+    @Operation(summary = "Получить список событий системы")
     public Map<String, Object> getList(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(required = false) List<AuditEventType> events,

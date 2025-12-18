@@ -8,6 +8,8 @@ import database.DTO.UserDTO;
 import database.models.User;
 import enums.UserError;
 import enums.UserRole;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +28,7 @@ import static enums.AuditEventType.*;
 @Slf4j
 @Controller
 @RequestMapping("/users")
+@Tag(name = "Users", description = "API для работы с пользователями")
 public class UserController {
 
     private static final int PAGE_SIZE = 5;
@@ -42,6 +45,7 @@ public class UserController {
     // ---------------- PAGE VIEW ----------------
 
     @GetMapping
+    @Operation(summary = "Открыть страницу пользователей")
     public String usersPage(@RequestParam(defaultValue = "1") int page, Model model) {
 
         PageResultDTO<User> result = PaginationUtils.paginateList(userDAO.getAllUsers(), page, PAGE_SIZE);
@@ -57,6 +61,7 @@ public class UserController {
 
     @ResponseBody
     @GetMapping("/list")
+    @Operation(summary = "Получить список пользователей")
     public Map<String, Object> getUsers(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(required = false) List<UserRole> roles
@@ -83,6 +88,7 @@ public class UserController {
 
     @ResponseBody
     @PostMapping("/add")
+    @Operation(summary = "Добавить нового пользователя")
     public ResponseEntity<?> addUser(@RequestBody UserDTO dto) {
         String actionUser = getCurrentUser();
         log.info("Attempt to create user {}", dto.getUsername());
@@ -109,6 +115,7 @@ public class UserController {
 
     @ResponseBody
     @DeleteMapping("/delete/{username}")
+    @Operation(summary = "Удалить пользователя")
     public ResponseEntity<?> deleteUser(@PathVariable String username, Principal principal) {
 
         String actionUser = getCurrentUser();
@@ -138,6 +145,7 @@ public class UserController {
 
     @ResponseBody
     @PutMapping("/edit")
+    @Operation(summary = "Редактировать пользователя")
     public ResponseEntity<?> editUser(@RequestBody EditUserDTO dto, Principal principal) {
 
         String actionUser = principal.getName();
@@ -178,6 +186,7 @@ public class UserController {
 
     @ResponseBody
     @GetMapping("/get/{username}")
+    @Operation(summary = "Получить пользователя по имени")
     public ResponseEntity<?> getUser(@PathVariable String username) {
         Optional<User> user = userDAO.getUserByUsername(username);
 

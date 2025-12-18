@@ -1,5 +1,6 @@
 package controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.ui.Model;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class MainController {
 
     @GetMapping("/main")
+    @Operation(summary = "Открыть главную страницу")
     public String mainPage(@AuthenticationPrincipal org.springframework.security.core.userdetails.User principal, Model model) {
 
         model.addAttribute("username", principal.getUsername());

@@ -2,6 +2,8 @@ package controllers;
 
 import database.DAO.StatisticsDAO;
 import database.DTO.StatisticsDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +17,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/statistics")
+@Tag(name = "Statistics", description = "API для работы со статистикой")
 public class StatisticsController {
 
     private final StatisticsDAO statisticsDAO;
@@ -28,6 +31,7 @@ public class StatisticsController {
      * HTML-страница статистики
      */
     @GetMapping
+    @Operation(summary = "Открыть страницу статистики")
     public String statisticsPage(
             @RequestParam(value = "days", required = false, defaultValue = "30") int days,
             Model model
@@ -49,6 +53,7 @@ public class StatisticsController {
      */
     @ResponseBody
     @GetMapping("/api/importance")
+    @Operation(summary = "Получить статистику по уровням важности")
     public ResponseEntity<List<StatisticsDto.ImportanceDto>> getImportanceStats() {
         return ResponseEntity.ok(statisticsDAO.getImportanceStats());
     }
@@ -58,6 +63,7 @@ public class StatisticsController {
      */
     @ResponseBody
     @GetMapping("/api/categories")
+    @Operation(summary = "Получить статистику по категориям")
     public ResponseEntity<List<StatisticsDto.CategoryDto>> getCategoryStats() {
         return ResponseEntity.ok(statisticsDAO.getCategoryStats());
     }
@@ -67,6 +73,7 @@ public class StatisticsController {
      */
     @ResponseBody
     @GetMapping("/api/daily")
+    @Operation(summary = "Получить статистику по дням")
     public ResponseEntity<List<StatisticsDto.DailyDto>> getDailyStats(
             @RequestParam(value = "days", required = false, defaultValue = "30") int days
     ) {

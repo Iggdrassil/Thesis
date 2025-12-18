@@ -2,6 +2,8 @@ package controllers;
 
 import database.DAO.EmailSettingsDAO;
 import database.models.EmailSettings;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import services.IncidentNotificationService;
 @Slf4j
 @Controller
 @RequestMapping("/notifications/email")
+@Tag(name = "Email", description = "API для работы с оповещением по email")
 public class EmailSettingsController {
 
     private final EmailSettingsDAO settingsDAO;
@@ -25,6 +28,7 @@ public class EmailSettingsController {
 
     // HTML страница настроек
     @GetMapping
+    @Operation(summary = "Открыть страницу настроек оповещения по email")
     public String settingsPage() {
         return "notification"; // notification.html в templates/
     }
@@ -32,6 +36,7 @@ public class EmailSettingsController {
     // Получение текущих настроек
     @ResponseBody
     @GetMapping("/settings")
+    @Operation(summary = "Получить текущие настройки оповещения по email")
     public EmailSettings getSettings() {
         log.info("Getting current email settings");
 
@@ -41,6 +46,7 @@ public class EmailSettingsController {
     // Обновление настроек
     @ResponseBody
     @PutMapping("/updateSettings")
+    @Operation(summary = "Обновить текущие настройки оповещения по email")
     public ResponseEntity<?> updateSettings(@RequestBody EmailSettings settings) {
         log.info("Updating email settings");
 
@@ -51,6 +57,7 @@ public class EmailSettingsController {
     // Отправка тестового письма
     @ResponseBody
     @PostMapping("/test")
+    @Operation(summary = "Отправить тестовое оповещение по email")
     public ResponseEntity<String> testEmail() {
         log.info("Sending test email");
 

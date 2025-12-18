@@ -7,6 +7,8 @@ import enums.IncidentCategory;
 import enums.IncidentError;
 import enums.IncidentLevel;
 import enums.IncidentRecommendation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,7 @@ import static enums.AuditEventType.*;
 @Slf4j
 @Controller
 @RequestMapping("/incidents")
+@Tag(name = "Incidents", description = "API для работы с инцидентами")
 public class IncidentController {
 
     private static final int PAGE_SIZE = 5;
@@ -69,6 +72,7 @@ public class IncidentController {
     // ---------- API ----------
 
     @GetMapping("/list")
+    @Operation(summary = "Получить список всех инцидентов")
     public ResponseEntity<?> getAllIncidents(
             @RequestParam(value = "page", required = false) Integer page) {
 
@@ -85,6 +89,7 @@ public class IncidentController {
     }
 
     @PostMapping("/add")
+    @Operation(summary = "Добавить новый инцидент")
     public ResponseEntity<?> addIncident(@RequestBody IncidentRequestDTO dto) {
 
         String user = getCurrentUser();
@@ -129,6 +134,7 @@ public class IncidentController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Удалить инцидент")
     public ResponseEntity<?> deleteIncident(@PathVariable UUID id) {
         log.info("Deleting incident {}", id);
 
@@ -145,6 +151,7 @@ public class IncidentController {
     }
 
     @PatchMapping("/edit/{id}")
+    @Operation(summary = "Редактировать инцидент")
     public ResponseEntity<?> editIncident(@PathVariable UUID id,
                                           @RequestBody IncidentRequestDTO dto) {
         log.info("Editing incident {}", id);
@@ -177,6 +184,7 @@ public class IncidentController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Получить инцидент по ID")
     public ResponseEntity<?> getIncidentById(@PathVariable UUID id) {
         Optional<Incident> incident = incidentDAO.findIncident(id);
 
@@ -192,6 +200,7 @@ public class IncidentController {
 
     @ResponseBody
     @GetMapping("/categories")
+    @Operation(summary = "Получить категории инцидента")
     public List<EnumLocalizedDto> getCategories() {
         return Arrays.stream(IncidentCategory.values())
                 .map(c -> new EnumLocalizedDto(c.name(), c.getLabel()))
@@ -200,6 +209,7 @@ public class IncidentController {
 
     @ResponseBody
     @GetMapping("/levels")
+    @Operation(summary = "Получить уровни важности инцидента")
     public List<EnumLocalizedDto> getLevels() {
         return Arrays.stream(IncidentLevel.values())
                 .map(l -> new EnumLocalizedDto(l.name(), l.getLabel()))
@@ -208,6 +218,7 @@ public class IncidentController {
 
     @ResponseBody
     @GetMapping("/recommendations")
+    @Operation(summary = "Получить рекоммендации инцидента")
     public List<EnumLocalizedDto> getRecommendations() {
         return Arrays.stream(IncidentRecommendation.values())
                 .map(r -> new EnumLocalizedDto(r.name(), r.getLabel()))
