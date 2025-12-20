@@ -11,19 +11,23 @@ import enums.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
-
-import java.security.Principal;
-import java.util.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import other.PaginationUtils;
 import services.AuditService;
 
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import static enums.AuditEventType.*;
+import static enums.UserError.USER_ALREADY_EXISTS;
+import static enums.UserError.WRONG_PASSWORD;
 
 @Slf4j
 @Controller
@@ -98,11 +102,21 @@ public class UserController {
         }
 
         if (userDAO.isUserExists(dto.getUsername())) {
-            return error(UserError.USER_ALREADY_EXISTS);
+            auditService.logEvent(
+                    USER_CREATED_FAIL,
+                    actionUser, dto.getUsername(),
+                    USER_ALREADY_EXISTS.getMessage()
+            );
+            return error(USER_ALREADY_EXISTS);
         }
 
         if (!isPasswordValid(dto.getPassword())) {
-            return error(UserError.WRONG_PASSWORD);
+            auditService.logEvent(
+                    USER_CREATED_FAIL,
+                    actionUser, dto.getUsername(),
+                    WRONG_PASSWORD.getMessage()
+            );
+            return error(WRONG_PASSWORD);
         }
 
         Optional<?> created = userDAO.addUser(dto.getUsername(), dto.getPassword(), dto.getRole());
@@ -111,7 +125,7 @@ public class UserController {
             return error(UserError.USER_CREATE_FAILED);
         }
 
-        auditService.logEvent(USER_CREATED, actionUser, actionUser,
+        auditService.logEvent(USER_CREATED_SUCCESS, actionUser, actionUser,
                 dto.getUsername(), dto.getRole().getRoleName());
 
         return ResponseEntity.ok().build();
@@ -164,14 +178,23 @@ public class UserController {
         // запрет переименования в уже существующее имя
         if (!dto.getOldUsername().equals(dto.getNewUsername())
                 && userDAO.isUserExists(dto.getNewUsername())) {
-            return error(UserError.USER_ALREADY_EXISTS);
+            auditService.logEvent(
+                    USER_EDITED_FAIL,
+                    actionUser, dto.getOldUsername(),
+                    USER_ALREADY_EXISTS.getMessage()
+            );
+            return error(USER_ALREADY_EXISTS);
         }
 
         // проверяем новый пароль только если он не пустой
-        if (dto.getNewPassword() != null && !dto.getNewPassword().isBlank()) {
-            if (!isPasswordValid(dto.getNewPassword())) {
-                return error(UserError.WRONG_PASSWORD);
-            }
+        if (dto.getNewPassword() != null && !dto.getNewPassword().isBlank() && (!isPasswordValid(dto.getNewPassword()))) {
+            auditService.logEvent(
+                    USER_EDITED_FAIL,
+                    actionUser, dto.getOldUsername(),
+                    WRONG_PASSWORD.getMessage()
+            );
+            return error(WRONG_PASSWORD);
+
         }
 
         Optional<User> edited = userDAO.editUser(
@@ -186,7 +209,7 @@ public class UserController {
         }
 
         auditService.logEvent(
-                USER_EDITED,
+                USER_EDITED_SUCCESS,
                 actionUser,
                 dto.getOldUsername(),
                 actionUser
