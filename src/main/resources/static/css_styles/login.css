@@ -57,7 +57,7 @@
 }
 
 /* Кнопка входа */
-.login-form button {
+.login-form button#loginButton {
     width: 100%;
     padding: 10px;
     background-color: #222;
@@ -69,6 +69,46 @@
     transition: background-color 0.3s ease;
 }
 
-.login-form button:hover {
+.login-form button#loginButton:hover {
     background-color: #444;
 }
+
+/* Обёртка для поля пароля */
+.password-wrapper {
+    position: relative;
+}
+
+/* Поле пароля с правым отступом для кнопки */
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px; /* чтобы кнопка не перекрывала текст */
+    box-sizing: border-box;
+}
+
+/* Кнопка-иконка глаза */
+.eye-button {
+    position: absolute;
+    right: 10px;          /* крайнее правое положение */
+    top: 39%;             /* вертикально по центру */
+    transform: translateY(-50%); /* центрирование */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;           /* чтобы не смещать иконку */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eye-button img {
+    width: 20px;   /* подбери подходящий размер иконки */
+    height: 20px;
+    display: block;
+    opacity: 0.7;
+}
+
+.eye-button img:hover {
+    opacity: 1;
+}
+
+

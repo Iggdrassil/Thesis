@@ -1,14 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const togglePassword = document.getElementById("togglePassword");
-    const passwordField = document.getElementById("password");
-
-    togglePassword.addEventListener("click", function () {
-        const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
-        passwordField.setAttribute("type", type);
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector(".login-form");
     const blockedMessage = document.getElementById("blockedMessage");
     const loginButton = document.getElementById("loginButton");
@@ -27,7 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
             body: formData
         });
 
-        // 🔒 Пользователь заблокирован
         if (response.status === 423) {
             const data = await response.json();
             let seconds = data.seconds;
@@ -55,10 +44,24 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // ❌ обычная ошибка логина → пусть Spring делает redirect
         if (response.redirected) {
             window.location.href = response.url;
         }
     });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordField = document.getElementById("password");
+    const eyeIcon = document.getElementById("eyeIcon");
+
+    togglePassword.addEventListener("click", function () {
+        const isPassword = passwordField.getAttribute("type") === "password";
+        passwordField.setAttribute("type", isPassword ? "text" : "password");
+
+        // Меняем иконку
+        eyeIcon.src = isPassword ? "/web/static/icons/eye-off.png" : "/web/static/icons/eye.png";
+    });
+});
+
 
