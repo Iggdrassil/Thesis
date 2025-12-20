@@ -111,12 +111,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 addUserModal.style.display = "none";
                 addUserForm.reset();
                 createUserBtn.disabled = true;
-                await render(1); // <-- заново отрисовываем первую страницу
-
-        } else if (response.status === 409) { // конфликт (уже существует)
-                showErrorModal("Пользователь уже существует");
+                await render(1); // заново отрисовываем первую страницу
             } else {
-                showErrorModal("Ошибка при создании пользователя");
+                // получаем тело ответа как JSON
+                const errorData = await response.json();
+
+               if (errorData && errorData.message) {
+                    showErrorModal(errorData.message);
+                } else {
+                    showErrorModal("Произошла неизвестная ошибка");
+                }
             }
         } catch (err) {
             showErrorModal("Ошибка соединения с сервером");
@@ -205,12 +209,15 @@ async function editUser(username) {
                 showSuccessModal("Пользователь успешно отредактирован");
                 editModal.style.display = "none";
                 await render(1);
-            }
-            else if (response.status === 409) {
-                showErrorModal("Имя пользователя уже существует");
-            }
-            else {
-                showErrorModal("Ошибка при редактировании пользователя");
+            } else {
+                // получаем тело ответа как JSON
+                const errorData = await response.json();
+
+                if (errorData && errorData.message) {
+                    showErrorModal(errorData.message);
+                } else {
+                    showErrorModal("Произошла неизвестная ошибка");
+                }
             }
         } catch (err) {
             showErrorModal("Ошибка соединения с сервером");
@@ -551,6 +558,28 @@ document.getElementById("cancelUserNameFilter").addEventListener("click", () => 
     usernameFilterInput.value = usernameFilterState;
     usernameFilterPopup.style.display = "none";
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const infoButtons = document.querySelectorAll('.info-btn');
+
+    infoButtons.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation(); // чтобы клик на кнопку не закрыл окно сразу
+            const popup = this.nextElementSibling;
+            // Скрываем все остальные попапы
+            document.querySelectorAll('.password-info-popup').forEach(p => {
+                if (p !== popup) p.style.display = 'none';
+            });
+            popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+        });
+    });
+
+    // Закрытие попапа при клике вне его
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.password-info-popup').forEach(p => p.style.display = 'none');
+    });
+});
+
 
 
 

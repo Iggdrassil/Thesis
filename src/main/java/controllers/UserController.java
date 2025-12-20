@@ -101,6 +101,10 @@ public class UserController {
             return error(UserError.USER_ALREADY_EXISTS);
         }
 
+        if (!isPasswordValid(dto.getPassword())) {
+            return error(UserError.WRONG_PASSWORD);
+        }
+
         Optional<?> created = userDAO.addUser(dto.getUsername(), dto.getPassword(), dto.getRole());
 
         if (created.isEmpty()) {
@@ -163,6 +167,13 @@ public class UserController {
             return error(UserError.USER_ALREADY_EXISTS);
         }
 
+        // проверяем новый пароль только если он не пустой
+        if (dto.getNewPassword() != null && !dto.getNewPassword().isBlank()) {
+            if (!isPasswordValid(dto.getNewPassword())) {
+                return error(UserError.WRONG_PASSWORD);
+            }
+        }
+
         Optional<User> edited = userDAO.editUser(
                 dto.getOldUsername(),
                 dto.getNewPassword(),
@@ -208,4 +219,13 @@ public class UserController {
                 .status(e.getStatus())
                 .body(new ErrorResponseDTO(e.name(), e.getMessage()));
     }
+
+    private boolean isPasswordValid(String password) {
+        if (password == null || password.length() < 3) return false;
+        if (!password.matches(".*[a-z].*")) return false;          // строчные буквы
+        if (!password.matches(".*[A-Z].*")) return false;          // прописные буквы
+        if (!password.matches(".*\\d.*")) return false;            // цифры
+        return password.matches(".*[!@#$%^&*()].*");   // спецсимволы
+    }
+
 }

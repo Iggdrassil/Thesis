@@ -108,7 +108,21 @@
             <input type="text" id="username" name="username" required>
 
             <label for="password">Пароль</label>
-            <input type="password" id="password" name="password" required>
+            <div class="password-field">
+                <input type="password" id="password" name="password" required>
+                <button type="button" class="info-btn">
+                    <img src="/web/static/icons/info.png" alt="Информация">
+                </button>
+                <div class="password-info-popup">
+                    <ul>
+                        <li>Не менее 3х символов</li>
+                        <li>Содержит строчные буквы латинского алфавита</li>
+                        <li>Содержит прописные буквы латинского алфавита</li>
+                        <li>Содержит цифры</li>
+                        <li>Содержит спец символ из перечисленных: !@#$%^&*()</li>
+                    </ul>
+                </div>
+            </div>
 
             <div class="role-group">
                 <label><input type="radio" name="role" value="ADMIN" required> Администратор ИБ</label>
@@ -135,7 +149,21 @@
             <input type="text" id="editUsername" name="editUsername" required>
 
             <label for="editPassword">Новый пароль</label>
-            <input type="password" id="editPassword" name="editPassword" placeholder="Оставьте пустым, если менять не нужно">
+            <div class="password-field">
+                <input type="password" id="editPassword" name="editPassword" placeholder="Оставьте пустым, если менять не нужно">
+                <button type="button" class="info-btn">
+                    <img src="/web/static/icons/info.png" alt="Информация">
+                </button>
+                <div class="password-info-popup">
+                    <ul>
+                        <li>Не менее 3х символов</li>
+                        <li>Содержит строчные буквы латинского алфавита</li>
+                        <li>Содержит прописные буквы латинского алфавита</li>
+                        <li>Содержит цифры</li>
+                        <li>Содержит спец символ из перечисленных: !@#$%^&*()</li>
+                    </ul>
+                </div>
+            </div>
 
             <div class="role-group">
                 <label><input type="radio" name="editRole" value="ADMIN"> Администратор ИБ</label>

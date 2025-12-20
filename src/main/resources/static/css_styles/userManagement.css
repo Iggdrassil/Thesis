@@ -214,6 +214,55 @@
     width: 200px;
 }
 
+.password-field {
+    position: relative;
+    width: 105%;
+}
+
+.password-field input {
+    width: 100%;
+    padding-right: 35px; /* место под кнопку info */
+    box-sizing: border-box;
+}
+
+.password-field .info-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 101; /* выше, чем всплывающее окно */
+}
+
+.password-field .info-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.password-info-popup {
+    display: none;
+    position: absolute;
+    top: 100%; /* под полем ввода */
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 5px;
+    width: 250px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 100; /* чуть ниже кнопки */
+    border-radius: 8px;
+}
+
+
+
+
 
 
 

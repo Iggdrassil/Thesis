@@ -14,6 +14,7 @@ public enum UserError {
     CANNOT_RENAME_SELF(HttpStatus.FORBIDDEN, "Нельзя менять свое имя пользователя"),
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "Некорректные данные запроса"),
     USER_EDIT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось обновить пользователя"),
+    WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "Пароль не соответствует требованиям безопасности"),
     USER_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка создания пользователя");
 
     private final HttpStatus status;
